@@ -1,14 +1,17 @@
 """
 main file to generate ails based on admin system
 """
-
+from importlib import import_module
 import sys
 import argparse
 import datetime
+from _datetime import date
 
 sys.path.insert(0, './ail_mesh')
 sys.path.insert(0, './core_utils')
 sys.path.insert(0, './afdm_attribution_ail')
+
+from transform import Transformer
 
 def parse_timestamp(timestamp):
     """
@@ -24,7 +27,7 @@ def main():
     """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--valuation-date',
+    parser.add_argument('-v','--valuation-date',
                         type=parse_timestamp,
                         help='date for which the AILs should be generated')
     parser.add_argument('-s', '--admin-system',
@@ -34,10 +37,16 @@ def main():
     parser.add_argument('-o', '--old-path',
                         help='path to the old input AILs')
 
-
     args = parser.parse_args()
 
-
+    #source=import_module(args.admin_system)
+    
+    Transformer(args)
+    
+    
+    
         
 if __name__ == '__main__':
-        main()
+    s=datetime.datetime.now()
+    main()
+    print(datetime.datetime.now()-s)
