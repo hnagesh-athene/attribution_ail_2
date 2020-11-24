@@ -6,12 +6,11 @@ import sys
 import argparse
 import datetime
 import os
+from transform import Transform
 
 sys.path.insert(0, './ail_mesh')
-sys.path.insert(0, './core_utils')
-sys.path.insert(0, './afdm_attribution_ail')
-
-from transform import Transform
+# sys.path.insert(0, './core_utils')
+#sys.path.insert(0, './afdm_attribution_ail')
 
 def parse_timestamp(timestamp):
     """
@@ -27,7 +26,7 @@ def main():
     """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-v','--valuation-date',
+    parser.add_argument('-v', '--valuation-date',
                         help='date for which the AILs should be generated')
     parser.add_argument('-s', '--admin-system',
                         help='name of the source system')
@@ -39,17 +38,13 @@ def main():
                         help='path to the output AILs',
                         default='output/test.ail2')
     args = parser.parse_args()
-    
+
     #source=import_module(args.admin_system)
     if not os.path.exists('output/'+args.valuation_date):
         os.mkdir('output/'+args.valuation_date)
-    
     Transform(args)
-    
-    
-    
-        
+
 if __name__ == '__main__':
-    s=datetime.datetime.now()
+    st = datetime.datetime.now()
     main()
-    print('total time-taken = ',datetime.datetime.now()-s)
+    print('total time-taken = ', datetime.datetime.now()-st)

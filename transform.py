@@ -2,12 +2,13 @@
 calculate/transform the required fields depending on admin system
 '''
 import tqdm
+#from collections import OrderedDict
 #from core_utils.progress import sane_tqdm
 #from core_utils.tabular import FastDictReader
 #from core_utils.tabular import CSVDataIO
-#from collections import OrderedDict
 from core_utils.core_utils.tabular import FastDictReader
 from core_utils.core_utils.tabular import CSVDataIO
+from afdm_attribution_ail.step1 import Step1
 
 class Transform:
     '''
@@ -40,26 +41,33 @@ class Transform:
         self.step_9()
         self.step_10()
 
-    def transformer(self, input_1, input_2, output, step, *field):
+    def transformer(self, input_1, input_2, output, step, changes=None):
         '''
         transform logic
         '''
         progress = tqdm.tqdm(mininterval=1, unit=' rows', desc='rows checked '+step)
         cur_row = next(input_1)
         prev_row = next(input_2)
+        policy = ''
         while cur_row:
             try:
                 if prev_row['Company']+prev_row['PolNo'] < cur_row['Company']+cur_row['PolNo']:
                     prev_row = next(input_2)
                 elif prev_row['Company']+prev_row['PolNo'] > cur_row['Company']+cur_row['PolNo']:
                     output.send(cur_row)
+                    policy = cur_row['Company']+cur_row['PolNo']
                     cur_row = next(input_1)
                 else:
                     #operations
+                    for func in changes.functions:
+                        cur_row = func(cur_row, prev_row)
                     output.send(cur_row)
+                    policy = cur_row['Company']+cur_row['PolNo']
                     cur_row = next(input_1)
                     prev_row = next(input_2)
             except StopIteration:
+                if policy != cur_row['Company']+cur_row['PolNo']:
+                    output.send(cur_row)
                 break
             progress.update()
         try:
@@ -109,10 +117,11 @@ class Transform:
         print('step - 1')
         cur, prev = self.reader(self.cur, self.prev)
         output = self.writer('step_1')
-        self.transformer(cur, prev, output, 'step-1')
+        changes = Step1()
+        self.transformer(cur, prev, output, 'step-1', changes)
         #self.close(cur,  prev)
         self.prev = self.cur
-        self.cur = 'step_1.ail2'
+        self.cur = self.output_path.format('step_1')
 
     def step_2(self):
         '''
@@ -124,7 +133,7 @@ class Transform:
         self.transformer(cur, prev, output, 'step-2')
         #self.close(cur, prev)
         self.prev = self.cur
-        self.cur = 'step_2.ail2'
+        self.cur = self.output_path.format('step_2')
 
     def step_3(self):
         '''
@@ -136,7 +145,7 @@ class Transform:
         self.transformer(cur, prev, output, 'step-3')
         #self.close(cur, prev)
         self.prev = self.cur
-        self.cur = 'step_3.ail2'
+        self.cur = self.output_path.format('step_3')
 
     def step_4(self):
         '''
@@ -148,7 +157,7 @@ class Transform:
         self.transformer(cur, prev, output, 'step-4')
         #self.close(cur, prev)
         self.prev = self.cur
-        self.cur = 'step_4.ail2'
+        self.cur = self.output_path.format('step_4')
 
     def step_5(self):
         '''
@@ -160,7 +169,7 @@ class Transform:
         self.transformer(cur, prev, output, 'step-5')
         #self.close(cur, prev)
         self.prev = self.cur
-        self.cur = 'step_5.ail2'
+        self.cur = self.output_path.format('step_5')
 
     def step_6(self):
         '''
@@ -172,7 +181,7 @@ class Transform:
         self.transformer(cur, prev, output, 'step-6')
         #self.close(cur, prev)
         self.prev = self.cur
-        self.cur = 'step_6.ail2'
+        self.cur = self.output_path.format('step_6')
 
     def step_7(self):
         '''
@@ -184,7 +193,7 @@ class Transform:
         self.transformer(cur, prev, output, 'step-7')
         #self.close(cur, prev)
         self.prev = self.cur
-        self.cur = 'step_7.ail2'
+        self.cur = self.output_path.format('step_7')
 
     def step_8(self):
         '''
@@ -196,7 +205,7 @@ class Transform:
         self.transformer(cur, prev, output, 'step-8')
         #self.close(cur, prev)
         self.prev = self.cur
-        self.cur = 'step_8.ail2'
+        self.cur = self.output_path.format('step_8')
 
     def step_9(self):
         '''
@@ -208,7 +217,7 @@ class Transform:
         self.transformer(cur, prev, output, 'step-9')
         #self.close(cur, prev)
         self.prev = self.cur
-        self.cur = 'step_9.ail2'
+        self.cur = self.output_path.format('step_9')
 
     def step_10(self):
         '''
@@ -219,3 +228,12 @@ class Transform:
         output = self.writer('step_10')
         self.transformer(cur, prev, output, 'step-10')
         #self.close(cur, prev)
+
+# example definition of actual transformation function
+#     def AVIF(self, cur_row, prev_row):
+#         '''
+#         this is an example how to transform the data
+#         '''
+#         cur_row['AVIF'] = prev_row['AVIF']
+#         return cur_row
+    
