@@ -1,25 +1,17 @@
 '''
-transformation step-1
+transformation step-2
 '''
 #from decimal import Decimal
 
-class Step1:
+class Step2:
     '''
-    changes to be made in step 1
+    changes to be made in step 2
     '''
     def __init__(self):
         '''
-        define fields to be modified in step 1
+        define fields to be modified in step 2
         '''
-        self.functions = [self.F133InitGuarCSV_Tax,
-                          self.F133GAVFloorValue,
-                          self.F133ROPAmt,
-                          self.Idx1AOptNomMV,
-                          self.Idx2AOptNomMV,
-                          self.Idx3AOptNomMV,
-                          self.Idx4AOptNomMV,
-                          self.Idx5AOptNomMV,
-                          self.Idx5ExcessRecLinkID]
+        self.functions = []
 
     def F133InitGuarCSV_Tax(self, cur, pre):
         '''

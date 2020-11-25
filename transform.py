@@ -8,7 +8,19 @@ import tqdm
 #from core_utils.tabular import CSVDataIO
 from core_utils.core_utils.tabular import FastDictReader
 from core_utils.core_utils.tabular import CSVDataIO
+
 from afdm_attribution_ail.step1 import Step1
+from afdm_attribution_ail.step2 import Step2
+from afdm_attribution_ail.step3 import Step3
+from afdm_attribution_ail.step4 import Step4
+from afdm_attribution_ail.step5 import Step5
+from afdm_attribution_ail.step6 import Step6
+from afdm_attribution_ail.step7 import Step7
+from afdm_attribution_ail.step8 import Step8
+from afdm_attribution_ail.step9 import Step9
+from afdm_attribution_ail.step10 import Step10
+
+from profile import Profile
 
 class Transform:
     '''
@@ -24,22 +36,20 @@ class Transform:
         self.fieldnames = []
         file_name = args.current_path.split('\\')
         self.output_path = 'output/'+args.valuation_date+'/{}_'+file_name[-1]
-        self.generate()
+        self.profile=Profile(self.args.admin_system)
+        self.all_steps=[self.step_1,self.step_2,self.step_3,self.step_4,self.step_5,
+                        self.step_6,self.step_7,self.step_8,self.step_9,self.step_10]
+        steps=self.steps_profile(self.profile)
+        self.generate(steps)
+    
+    def steps_profile(self, profile):
+        return [i[1] for i in zip(profile.steps_required, self.all_steps) if i[0]]
 
-    def generate(self):
+    def generate(self, steps):
         '''
         read transform and create output files
         '''
-        self.step_1()
-        self.step_2()
-        self.step_3()
-        self.step_4()
-        self.step_5()
-        self.step_6()
-        self.step_7()
-        self.step_8()
-        self.step_9()
-        self.step_10()
+        [func() for func in steps]
 
     def transformer(self, input_1, input_2, output, step, changes=None):
         '''
@@ -130,7 +140,8 @@ class Transform:
         print('step - 2')
         cur, prev = self.reader(self.cur, self.prev)
         output = self.writer('step_2')
-        self.transformer(cur, prev, output, 'step-2')
+        changes = Step2()
+        self.transformer(cur, prev, output, 'step-2', changes)
         #self.close(cur, prev)
         self.prev = self.cur
         self.cur = self.output_path.format('step_2')
@@ -142,7 +153,8 @@ class Transform:
         print('step - 3')
         cur, prev = self.reader(self.cur, self.prev)
         output = self.writer('step_3')
-        self.transformer(cur, prev, output, 'step-3')
+        changes = Step3()
+        self.transformer(cur, prev, output, 'step-3', changes)
         #self.close(cur, prev)
         self.prev = self.cur
         self.cur = self.output_path.format('step_3')
@@ -154,7 +166,8 @@ class Transform:
         print('step - 4')
         cur, prev = self.reader(self.cur, self.prev)
         output = self.writer('step_4')
-        self.transformer(cur, prev, output, 'step-4')
+        changes = Step4()
+        self.transformer(cur, prev, output, 'step-4', changes)
         #self.close(cur, prev)
         self.prev = self.cur
         self.cur = self.output_path.format('step_4')
@@ -166,7 +179,8 @@ class Transform:
         print('step - 5')
         cur, prev = self.reader(self.cur, self.prev)
         output = self.writer('step_5')
-        self.transformer(cur, prev, output, 'step-5')
+        changes = Step5()
+        self.transformer(cur, prev, output, 'step-5', changes)
         #self.close(cur, prev)
         self.prev = self.cur
         self.cur = self.output_path.format('step_5')
@@ -178,7 +192,8 @@ class Transform:
         print('step - 6')
         cur, prev = self.reader(self.cur, self.prev)
         output = self.writer('step_6')
-        self.transformer(cur, prev, output, 'step-6')
+        changes = Step6()
+        self.transformer(cur, prev, output, 'step-6', changes)
         #self.close(cur, prev)
         self.prev = self.cur
         self.cur = self.output_path.format('step_6')
@@ -190,7 +205,8 @@ class Transform:
         print('step - 7')
         cur, prev = self.reader(self.cur, self.prev)
         output = self.writer('step_7')
-        self.transformer(cur, prev, output, 'step-7')
+        changes = Step7()
+        self.transformer(cur, prev, output, 'step-7', changes)
         #self.close(cur, prev)
         self.prev = self.cur
         self.cur = self.output_path.format('step_7')
@@ -202,7 +218,8 @@ class Transform:
         print('step - 8')
         cur, prev = self.reader(self.cur, self.prev)
         output = self.writer('step_8')
-        self.transformer(cur, prev, output, 'step-8')
+        changes = Step8()
+        self.transformer(cur, prev, output, 'step-8', changes)
         #self.close(cur, prev)
         self.prev = self.cur
         self.cur = self.output_path.format('step_8')
@@ -214,7 +231,8 @@ class Transform:
         print('step - 9')
         cur, prev = self.reader(self.cur, self.prev)
         output = self.writer('step_9')
-        self.transformer(cur, prev, output, 'step-9')
+        changes = Step9()
+        self.transformer(cur, prev, output, 'step-9', changes)
         #self.close(cur, prev)
         self.prev = self.cur
         self.cur = self.output_path.format('step_9')
@@ -226,7 +244,8 @@ class Transform:
         print('step - 10')
         cur, prev = self.reader(self.cur, self.prev)
         output = self.writer('step_10')
-        self.transformer(cur, prev, output, 'step-10')
+        changes = Step10()
+        self.transformer(cur, prev, output, 'step-10', changes)
         #self.close(cur, prev)
 
 # example definition of actual transformation function

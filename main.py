@@ -8,8 +8,8 @@ import datetime
 import os
 from transform import Transform
 
-sys.path.insert(0, './ail_mesh')
-# sys.path.insert(0, './core_utils')
+#sys.path.insert(0, './ail_mesh')
+#sys.path.insert(0, './core_utils')
 #sys.path.insert(0, './afdm_attribution_ail')
 
 def parse_timestamp(timestamp):
