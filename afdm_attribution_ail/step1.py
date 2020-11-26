@@ -11,6 +11,7 @@ class Step1:
         '''
         define fields to be modified in step 1
         '''
+        print('Step 1 class')
         self.functions = [self.F133InitGuarCSV_Tax,
                           self.F133GAVFloorValue,
                           self.F133ROPAmt,
