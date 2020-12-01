@@ -2,7 +2,7 @@
 main file to generate ails based on admin system
 """
 #from importlib import import_module
-import sys
+#import sys
 import argparse
 import datetime
 import os
