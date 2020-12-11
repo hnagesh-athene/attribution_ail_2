@@ -2,16 +2,20 @@
 transformation step-1
 '''
 #from decimal import Decimal
+from prework import Prework
+from datetime import date
 
-class Step1:
+class Step1(Prework):
     '''
     changes to be made in step 1
     '''
-    def __init__(self):
+    def __init__(self, valuation_date):
         '''
         define fields to be modified in step 1
         '''
         print('Step 1 class')
+        self.valuation_date = date(int(valuation_date[:4]), int(valuation_date[4:6]), int(valuation_date[6:]))
+        print(self.valuation_date)
         self.functions = [self.F133InitGuarCSV_Tax,
                           self.F133GAVFloorValue,
                           self.F133ROPAmt,
@@ -21,6 +25,7 @@ class Step1:
                           self.Idx4AOptNomMV,
                           self.Idx5AOptNomMV,
                           self.Idx5ExcessRecLinkID]
+        self.count=0
 
     def F133InitGuarCSV_Tax(self, cur, pre):
         '''
@@ -55,6 +60,11 @@ class Step1:
         '''
         logic for the field
         '''
+        if self.effective_date(self.valuation_date, cur, index):
+            #logic
+            self.count+=1
+            
+            
         avif = cur['Idx{}AVIF'.format(index)]
         term = cur['Idx{}Term'.format(index)]
         return cur

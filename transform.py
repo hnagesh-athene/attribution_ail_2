@@ -20,10 +20,10 @@ from afdm_attribution_ail.step7 import Step7
 from afdm_attribution_ail.step8 import Step8
 from afdm_attribution_ail.step9 import Step9
 from afdm_attribution_ail.step10 import Step10
+from prework import Prework
 
 
-
-class Transform:
+class Transform(Prework):
     '''
     generate step 1- 10 atttribution_ails
     '''
@@ -32,6 +32,7 @@ class Transform:
         initialize the class object
         '''
         self.args = args
+        print(self.args.valuation_date)
         self.cur = args.current_path
         self.prev = args.previous_path
         self.fieldnames = []
@@ -62,7 +63,7 @@ class Transform:
         get the field names and functions for the respective steps
         '''
         print('steps_change')
-        return [Step1(), Step2(), Step3(), Step4(), Step5(),
+        return [Step1(self.args.valuation_date), Step2(), Step3(), Step4(), Step5(),
                 Step6(), Step7(), Step8(), Step9(), Step10()]
 
     def generate(self):
@@ -86,8 +87,9 @@ class Transform:
                 if prev_row['Company']+prev_row['PolNo'] < cur_row['Company']+cur_row['PolNo']:
                     prev_row = next(input_2)
                 elif prev_row['Company']+prev_row['PolNo'] > cur_row['Company']+cur_row['PolNo']:
-                    for func in steps:
-                        cur_row = func(cur_row)
+                    self.write_all(cur_row)
+#                     for func in steps:
+#                         cur_row = func(cur_row)
                     policy = cur_row['Company']+cur_row['PolNo']
                     cur_row = next(input_1)
                 else:
@@ -99,19 +101,22 @@ class Transform:
                     prev_row = next(input_2)
             except StopIteration:
                 if policy != cur_row['Company']+cur_row['PolNo']:
-                    for func in steps:
-                        cur_row = func(cur_row)
+                    self.write_all(cur_row)
+#                     for func in steps:
+#                         cur_row = func(cur_row)
                 break
             progress.update()
         try:
             cur_row = next(input_1)
             while cur_row:
-                for func in steps:
-                    cur_row = func(cur_row)
+#                 for func in steps:
+#                     cur_row = func(cur_row)
+                self.write_all(cur_row)
                 cur_row = next(input_1)
         except StopIteration:
             progress.update()
         progress.close()
+        print(self.changes[0].count)
             ##print('\ndone')
 
     def reader(self, file_1, file_2):
@@ -286,6 +291,14 @@ class Transform:
         self.writers[9].send(cur_row)
         return cur_row
         #self.close(cur, prev)
+    
+    def write_all(self, cur_row):
+        '''
+        write directly if no logic is involved
+        '''
+        for step in self.writers:
+            if step:
+                step.send(cur_row)
 
 # example definition of actual transformation function
 #     def AVIF(self, cur_row, prev_row):

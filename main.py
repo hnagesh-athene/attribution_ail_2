@@ -7,7 +7,7 @@ import argparse
 import datetime
 import os
 from transform import Transform
-
+#from prework import Prework
 #sys.path.insert(0, './ail_mesh')
 #sys.path.insert(0, './core_utils')
 #sys.path.insert(0, './afdm_attribution_ail')
@@ -42,6 +42,7 @@ def main():
     #source=import_module(args.admin_system)
     if not os.path.exists('output/'+args.valuation_date):
         os.mkdir('output/'+args.valuation_date)
+    #Prework(args)
     Transform(args)
 
 if __name__ == '__main__':
