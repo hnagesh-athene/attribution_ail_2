@@ -46,7 +46,7 @@ class Transform(Prework):
         self.changes = self.change_steps()
         self.cur_file, self.prev_file = self.reader(self.cur, self.prev)
         self.writers = self.generate()
-        self.transformer(self.cur_file, self.prev_file, self.steps)
+        self.transformer(self.prev_file, self.cur_file, self.steps)
 
     def steps_profile(self, admin_system):
         '''
@@ -63,7 +63,8 @@ class Transform(Prework):
         get the field names and functions for the respective steps
         '''
         print('steps_change')
-        return [Step1(self.args.valuation_date), Step2(), Step3(), Step4(), Step5(),
+        d=self.args.valuation_date
+        return [Step1(d), Step2(d), Step3(), Step4(), Step5(),
                 Step6(), Step7(), Step8(), Step9(), Step10()]
 
     def generate(self):
@@ -79,44 +80,45 @@ class Transform(Prework):
         '''
         print('transform')
         progress = tqdm.tqdm(mininterval=1, unit=' rows', desc='rows checked ')
-        cur_row = next(input_1)
-        prev_row = next(input_2)
+        previous_row = next(input_1)
+        current_row = next(input_2)
         policy = ''
-        while cur_row:
+        while previous_row:
             try:
-                if prev_row['Company']+prev_row['PolNo'] < cur_row['Company']+cur_row['PolNo']:
-                    prev_row = next(input_2)
-                elif prev_row['Company']+prev_row['PolNo'] > cur_row['Company']+cur_row['PolNo']:
-                    self.write_all(cur_row)
+                if current_row['Company']+current_row['PolNo'] < previous_row['Company']+previous_row['PolNo']:
+                    current_row = next(input_2)
+                elif current_row['Company']+current_row['PolNo'] > previous_row['Company']+previous_row['PolNo']:
+                    self.write_all(previous_row)
 #                     for func in steps:
-#                         cur_row = func(cur_row)
-                    policy = cur_row['Company']+cur_row['PolNo']
-                    cur_row = next(input_1)
+#                         previous_row = func(previous_row)
+                    policy = previous_row['Company']+previous_row['PolNo']
+                    previous_row = next(input_1)
                 else:
                     #operations
                     for func in steps:
-                        cur_row = func(cur_row, prev_row)
-                    policy = cur_row['Company']+cur_row['PolNo']
-                    cur_row = next(input_1)
-                    prev_row = next(input_2)
+                        previous_row = func(previous_row, current_row)
+                    policy = previous_row['Company']+previous_row['PolNo']
+                    previous_row = next(input_1)
+                    current_row = next(input_2)
             except StopIteration:
-                if policy != cur_row['Company']+cur_row['PolNo']:
-                    self.write_all(cur_row)
+                if policy != previous_row['Company']+previous_row['PolNo']:
+                    self.write_all(previous_row)
 #                     for func in steps:
-#                         cur_row = func(cur_row)
+#                         previous_row = func(previous_row)
                 break
             progress.update()
         try:
-            cur_row = next(input_1)
-            while cur_row:
+            previous_row = next(input_1)
+            while previous_row:
 #                 for func in steps:
-#                     cur_row = func(cur_row)
-                self.write_all(cur_row)
-                cur_row = next(input_1)
+#                     previous_row = func(previous_row)
+                self.write_all(previous_row)
+                previous_row = next(input_1)
         except StopIteration:
             progress.update()
         progress.close()
         print(self.changes[0].count)
+        print(self.changes[0].c)
             ##print('\ndone')
 
     def reader(self, file_1, file_2):
@@ -153,7 +155,7 @@ class Transform(Prework):
 #         fp_1.close()
 #         fp_2.close()
 
-    def step_1(self, cur_row, prev_row=None):
+    def step_1(self, previous_row, current_row=None):
         '''
         step 1
         '''
@@ -161,150 +163,150 @@ class Transform(Prework):
 #         cur, prev = self.reader(self.cur, self.prev)
 #         output = self.writer('step_1')
 #         changes = Step1()
-        if prev_row:
+        if current_row:
             #print( self.changes[0].functions)
             #print( self.changes[0])
             for change in self.changes[0].functions:
                 #print(change)
-                cur_row = change(cur_row, prev_row)
-        self.writers[0].send(cur_row)
-        return cur_row
+                previous_row = change(previous_row, current_row)
+        self.writers[0].send(previous_row)
+        return previous_row
         #self.close(cur,  prev)
 #         self.prev = self.cur
 #         self.cur = self.output_path.format('step_1')
 
-    def step_2(self, cur_row, prev_row=None):
+    def step_2(self, previous_row, current_row=None):
         '''
         step 2
         '''
-        if prev_row:
+        if current_row:
             #print( self.changes[1].functions)
             #print( self.changes[1])
             for change in self.changes[1].functions:
                 #print(change)
-                cur_row = change(cur_row, prev_row)
-        self.writers[1].send(cur_row)
-        return cur_row
+                previous_row = change(previous_row, current_row)
+            self.writers[1].send(previous_row)
+        return previous_row
 
-    def step_3(self, cur_row, prev_row=None):
+    def step_3(self, previous_row, current_row=None):
         '''
         step 3
         '''
-        if prev_row:
+        if current_row:
             #print( self.changes[2].functions)
             #print( self.changes[2])
             for change in self.changes[2].functions:
                 #print(change)
-                cur_row = change(cur_row, prev_row)
-        self.writers[2].send(cur_row)
-        return cur_row
+                previous_row = change(previous_row, current_row)
+            self.writers[2].send(previous_row)
+        return previous_row
 
-    def step_4(self, cur_row, prev_row=None):
+    def step_4(self, previous_row, current_row=None):
         '''
         step 4
         '''
         #print('step - 4')
-        if prev_row:
+        if current_row:
             #print( self.changes[3].functions)
             #print( self.changes[3])
             for change in self.changes[3].functions:
                 #print(change)
-                cur_row = change(cur_row, prev_row)
-        self.writers[3].send(cur_row)
-        return cur_row
+                previous_row = change(previous_row, current_row)
+            self.writers[3].send(previous_row)
+        return previous_row
 
-    def step_5(self, cur_row, prev_row=None):
+    def step_5(self, previous_row, current_row=None):
         '''
         step 5
         '''
-        if prev_row:
+        if current_row:
             #print( self.changes[4].functions)
             #print( self.changes[4])
             for change in self.changes[4].functions:
                 #print(change)
-                cur_row = change(cur_row, prev_row)
-        self.writers[4].send(cur_row)
-        return cur_row
+                previous_row = change(previous_row, current_row)
+            self.writers[4].send(previous_row)
+        return previous_row
 
-    def step_6(self, cur_row, prev_row=None):
+    def step_6(self, previous_row, current_row=None):
         '''
         step 6
         '''
-        if prev_row:
+        if current_row:
             #print( self.changes[5].functions)
             #print( self.changes[5])
             for change in self.changes[5].functions:
                 #print(change)
-                cur_row = change(cur_row, prev_row)
-        self.writers[5].send(cur_row)
-        return cur_row
+                previous_row = change(previous_row, current_row)
+            self.writers[5].send(previous_row)
+        return previous_row
 
-    def step_7(self, cur_row, prev_row=None):
+    def step_7(self, previous_row, current_row=None):
         '''
         step 7
         '''
-        if prev_row:
+        if current_row:
             #print( self.changes[6].functions)
             #print( self.changes[6])
             for change in self.changes[6].functions:
                 #print(change)
-                cur_row = change(cur_row, prev_row)
-        self.writers[6].send(cur_row)
-        return cur_row
+                previous_row = change(previous_row, current_row)
+            self.writers[6].send(previous_row)
+        return previous_row
 
-    def step_8(self, cur_row, prev_row=None):
+    def step_8(self, previous_row, current_row=None):
         '''
         step 8
         '''
-        if prev_row:
+        if current_row:
             #print( self.changes[7].functions)
             #print( self.changes[7])
             for change in self.changes[7].functions:
                 #print(change)
-                cur_row = change(cur_row, prev_row)
-        self.writers[7].send(cur_row)
-        return cur_row
+                previous_row = change(previous_row, current_row)
+            self.writers[7].send(previous_row)
+        return previous_row
 
-    def step_9(self, cur_row, prev_row=None):
+    def step_9(self, previous_row, current_row=None):
         '''
         step 9
         '''
-        if prev_row:
+        if current_row:
             #print( self.changes[8].functions)
             #print( self.changes[8])
             for change in self.changes[8].functions:
                 #print(change)
-                cur_row = change(cur_row, prev_row)
-        self.writers[8].send(cur_row)
-        return cur_row
+                previous_row = change(previous_row, current_row)
+            self.writers[8].send(previous_row)
+        return previous_row
 
-    def step_10(self, cur_row, prev_row=None):
+    def step_10(self, previous_row, current_row=None):
         '''
         step 10
         '''
-        if prev_row:
+        if current_row:
             #print( self.changes[9].functions)
             #print( self.changes[9])
             for change in self.changes[9].functions:
                 #print(change)
-                cur_row = change(cur_row, prev_row)
-        self.writers[9].send(cur_row)
-        return cur_row
+                previous_row = change(previous_row, current_row)
+            self.writers[9].send(previous_row)
+        return previous_row
         #self.close(cur, prev)
     
-    def write_all(self, cur_row):
+    def write_all(self, previous_row):
         '''
         write directly if no logic is involved
         '''
         for step in self.writers:
             if step:
-                step.send(cur_row)
+                step.send(previous_row)
 
 # example definition of actual transformation function
-#     def AVIF(self, cur_row, prev_row):
+#     def AVIF(self, previous_row, current_row):
 #         '''
 #         this is an example how to transform the data
 #         '''
-#         cur_row['AVIF'] = prev_row['AVIF']
-#         return cur_row
+#         previous_row['AVIF'] = current_row['AVIF']
+#         return previous_row
     

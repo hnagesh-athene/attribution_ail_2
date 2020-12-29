@@ -15,7 +15,7 @@ class Step1(Prework):
         '''
         print('Step 1 class')
         self.valuation_date = date(int(valuation_date[:4]), int(valuation_date[4:6]), int(valuation_date[6:]))
-        print(self.valuation_date)
+        #print(self.valuation_date)
         self.functions = [self.F133InitGuarCSV_Tax,
                           self.F133GAVFloorValue,
                           self.F133ROPAmt,
@@ -26,75 +26,75 @@ class Step1(Prework):
                           self.Idx5AOptNomMV,
                           self.Idx5ExcessRecLinkID]
         self.count=0
+        self.c=0
 
-    def F133InitGuarCSV_Tax(self, cur, pre):
+    def F133InitGuarCSV_Tax(self, previous_row, current_row):
         '''
         logic for the field
         '''
-        return cur
-#         cur['F133InitGuarCSV_Tax'] = round(pre['F133InitGuarCSV_Tax'],2)
-#         return cur
+        return previous_row
+#         previous_row['F133InitGuarCSV_Tax'] = round(current_row['F133InitGuarCSV_Tax'],2)
+#         return previous_row
 
-    def F133GAVFloorValue(self, cur, pre):
+    def F133GAVFloorValue(self, previous_row, current_row):
         '''
         logic for the field
         '''
-        cur['F133GAVFloorValue'] = round(float(pre['F133GAVFloorValue']), 10)
-        return cur
+        previous_row['F133GAVFloorValue'] = round(float(current_row['F133GAVFloorValue']), 10)
+        return previous_row
 
-    def F133ROPAmt(self, cur, pre):
+    def F133ROPAmt(self, previous_row, current_row):
         '''
         logic for the field
         '''
-        cur['F133ROPAmt'] = round(float(pre['F133ROPAmt']), 10)
-        return cur
+        previous_row['F133ROPAmt'] = round(float(current_row['F133ROPAmt']), 10)
+        return previous_row
 
-    def Idx5ExcessRecLinkID(self, cur, pre):
+    def Idx5ExcessRecLinkID(self, previous_row, current_row):
         '''
         logic for the field
         '''
-        cur['Idx5ExcessRecLinkID'] = pre['Idx5ExcessRecLinkID'][:20]
-        return cur
+        previous_row['Idx5ExcessRecLinkID'] = current_row['Idx5ExcessRecLinkID'][:20]
+        return previous_row
 
-    def AOptNomMV(self, cur, pre, index):
+    def AOptNomMV(self, previous_row, current_row, index):
         '''
         logic for the field
         '''
-        if self.effective_date(self.valuation_date, cur, index):
+        if self.effective_date(self.valuation_date, previous_row, index):
             #logic
             self.count+=1
-            
-            
-        avif = cur['Idx{}AVIF'.format(index)]
-        term = cur['Idx{}Term'.format(index)]
-        return cur
+        avif = previous_row['Idx{}AVIF'.format(index)]
+        term = previous_row['Idx{}Term'.format(index)]
+        return previous_row
 
-    def Idx1AOptNomMV(self, cur, pre):
+    def Idx1AOptNomMV(self, previous_row, current_row):
         '''
         logic for the field
         '''
-        return self.AOptNomMV(cur, pre, 1)
+        self.c+=1
+        return self.AOptNomMV(previous_row, current_row, 1)
 
-    def Idx2AOptNomMV(self, cur, pre):
+    def Idx2AOptNomMV(self, previous_row, current_row):
         '''
         logic for the field
         '''
-        return self.AOptNomMV(cur, pre, 2)
+        return self.AOptNomMV(previous_row, current_row, 2)
 
-    def Idx3AOptNomMV(self, cur, pre):
+    def Idx3AOptNomMV(self, previous_row, current_row):
         '''
         logic for the field
         '''
-        return self.AOptNomMV(cur, pre, 3)
+        return self.AOptNomMV(previous_row, current_row, 3)
 
-    def Idx4AOptNomMV(self, cur, pre):
+    def Idx4AOptNomMV(self, previous_row, current_row):
         '''
         logic for the field
         '''
-        return self.AOptNomMV(cur, pre, 4)
+        return self.AOptNomMV(previous_row, current_row, 4)
 
-    def Idx5AOptNomMV(self, cur, pre):
+    def Idx5AOptNomMV(self, previous_row, current_row):
         '''
         logic for the field
         '''
-        return self.AOptNomMV(cur, pre, 5)
+        return self.AOptNomMV(previous_row, current_row, 5)

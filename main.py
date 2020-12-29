@@ -42,7 +42,7 @@ def main():
     #source=import_module(args.admin_system)
     if not os.path.exists('output/'+args.valuation_date):
         os.mkdir('output/'+args.valuation_date)
-    #Prework(args)
+#     #Prework(args)
     Transform(args)
 
 if __name__ == '__main__':
