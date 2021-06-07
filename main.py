@@ -6,7 +6,8 @@ main file to generate ails based on admin system
 import argparse
 import datetime
 import os
-from transform import Transform
+# from transform import Transform
+from ail_transform import Transform
 #from prework import Prework
 #sys.path.insert(0, './ail_mesh')
 #sys.path.insert(0, './core_utils')
@@ -30,9 +31,12 @@ def main():
                         help='date for which the AILs should be generated')
     parser.add_argument('-s', '--admin-system',
                         help='name of the source system')
-    parser.add_argument('-c', '--current-path',
-                        help='path to the current input AILs')
-    parser.add_argument('-p', '--previous-path',
+    parser.add_argument('-b', '--block',
+                        help='name of the block')
+    
+#     parser.add_argument('-c', '--current-path',
+#                         help='path to the current input AILs')
+    parser.add_argument('-m', '--merger-path',
                         help='path to the old input AILs')
     parser.add_argument('-o', '--output',
                         help='path to the output AILs',
