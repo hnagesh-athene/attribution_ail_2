@@ -25,52 +25,50 @@ class Step1(Prework):
                           self.generate]
         
 
-    def row_builder(self,merger_row, current_row):
+    def row_builder(self,merger_row, current_row, fieldnames):
         
         
         self.row = OrderedDict()
-        self.row = {fields:None for fields in order}
+        self.row = {fields:None for fields in fieldnames}
         
         return self.row
     
-    def IdxAOptNomMV(self, merge, previous_row):
+    def IdxAOptNomMV(self, merge, previous_row, fieldnames):
         '''
         logic for the field
         '''
-        
-        sum_idx_avif = 0
-        
-        for i in range(1,6):
-            if merge['Idx{}AVIF_PQ'.format(i)]:
-                sum_idx_avif += float(merge['Idx{}AVIF_PQ'.format(i)])
-        
-        
-        if merge['index_credit'] != '0.0' and sum_idx_avif != 0:
+        if 'Idx1AOptNomMV' in fieldnames:
             
-            previous_row['Idx1AOptNomMV'] = float(merge['index_credit'])/sum_idx_avif
-            previous_row['Idx2AOptNomMV'] = float(merge['index_credit'])/sum_idx_avif
-            previous_row['Idx3AOptNomMV'] = float(merge['index_credit'])/sum_idx_avif
-            previous_row['Idx4AOptNomMV'] = float(merge['index_credit'])/sum_idx_avif
-            previous_row['Idx5AOptNomMV'] = float(merge['index_credit'])/sum_idx_avif
-           
-        else:
-            previous_row['Idx1AOptNomMV'] = merge['Idx1AOptNomMV_PQ']
-            previous_row['Idx2AOptNomMV'] = merge['Idx2AOptNomMV_PQ']
-            previous_row['Idx3AOptNomMV'] = merge['Idx3AOptNomMV_PQ']
-            previous_row['Idx4AOptNomMV'] = merge['Idx4AOptNomMV_PQ']
-            previous_row['Idx5AOptNomMV'] = merge['Idx5AOptNomMV_PQ']
-            
-        
+            if merge['Company'] == 'CU':
+                return previous_row
+            else:
+                sum_idx_avif = 0
+                
+                for i in range(1,6):
+                    if merge[f'Idx{i}AVIF_PQ'] and merge[f'_int_idx{i}_anniv'] == 'Y':
+                        sum_idx_avif += float(merge[f'Idx{i}AVIF_PQ'])
+                 
+                for i in range(1,6):
+                    if merge[f'_int_idx{i}_anniv'] == 'Y' and float(merge['index_credit']) != 0 and sum_idx_avif != 0:
+                        previous_row[f'Idx{i}AOptNomMV'] = float(merge['index_credit'])/sum_idx_avif
+                    elif float(merge[f'Idx{i}AVIF_PQ']) != 0:
+                        previous_row[f'Idx{i}AOptNomMV'] = merge[f'Idx{i}AOptNomMV_PQ']
+                    else:
+                        previous_row[f'Idx{i}AOptNomMV'] = 0
+                
+    
         return previous_row
            
-    def generate(self,merge,previous_row):
+    def generate(self,merge,previous_row,fieldnames):
         '''
         Default fields
         '''
         
-        for fields in order:
+        for fields in fieldnames:
             if fields in ('PolNo', 'Company'):
                 previous_row[fields] = merge[fields]
+            elif merge['Company'] == 'CU':
+                previous_row[fields] = merge[fields+'_PQ']
             elif fields not in ['Idx1AOptNomMV', 'Idx5AOptNomMV', 'Idx2AOptNomMV', 'Idx3AOptNomMV', 'Idx4AOptNomMV']:
                 previous_row[fields] = merge[fields+'_PQ']
         

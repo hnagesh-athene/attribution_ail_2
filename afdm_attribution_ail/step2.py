@@ -16,12 +16,13 @@ class Step2:
         #print(self.valuation_date)
         self.functions = [self.ICOSFlag]
         
-    def ICOSFlag(self, merger_row, previous_row):
+    def ICOSFlag(self, merger_row, previous_row, fieldnames):
         '''
         logic for the field
         '''
-        if merger_row['join_indicator'] == 'AB':
-            previous_row['ICOSFlag'] = merger_row['ICOSFlag_CQ']
+        if 'ICOSFlag' in fieldnames:
+            if merger_row['join_indicator'] == 'AB':
+                previous_row['ICOSFlag'] = merger_row['ICOSFlag_CQ']
         return previous_row
 
     
