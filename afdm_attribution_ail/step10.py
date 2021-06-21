@@ -6,6 +6,8 @@ from prework import Prework
 from datetime import date
 from collections import OrderedDict
 from Columns import AIL_Columns as order
+from _ast import If
+from _operator import index
 
 class Step10:
     '''
@@ -21,78 +23,203 @@ class Step10:
         self.functions = [self.row_builder,
                           self.GenBudgetOBCurr,
                           self.GenBudgetUltOB,
-                          self.idx,
-                          self.generate]
+                          self.IdxBudgetStrategyFee,
+                          self.IdxBudgetVolAdjOB,
+                          self.IdxBudgetOBCurr,
+                          self.IdxBudgetUltOB,
+                          self.generate,
+                          self.fixed]
         
     
-    def row_builder(self,merger_row, current_row):
+    def row_builder(self,merger_row, current_row, fieldnames, args):
         
         
         self.row = OrderedDict()
-        self.row = {fields:None for fields in order}
+        self.row = {fields:None for fields in fieldnames}
         
         return self.row
 
-    def GenBudgetOBCurr(self, merger_row, current_row):
+    def GenBudgetOBCurr(self, merger_row, current_row, fieldnames, args):
         '''
         logic for the field
         '''
-        if merger_row['join_indicator'] in ('AB') and merger_row['GenAV_PQ'] and float(merger_row['GenAV_PQ']) > 0:
-            current_row['GenBudgetOBCurr'] = merger_row['GenBudgetOBCurr_PQ']
-        else:
-            current_row['GenBudgetOBCurr'] = merger_row['GenBudgetOBCurr_CQ']
+        if 'GenBudgetOBCurr' in fieldnames:
+            
+            if merger_row['join_indicator'] == 'AB' and( merger_row['GenAV_PQ'] and float(merger_row['GenAV_PQ']) > 0\
+            and merger_row['GenAV_CQ'] and float(merger_row['GenAV_CQ']) > 0):
+                current_row['GenBudgetOBCurr'] = merger_row['GenBudgetOBCurr_PQ']
+            else:
+                current_row['GenBudgetOBCurr'] = merger_row['GenBudgetOBCurr_CQ']
         
         return current_row
     
-    def GenBudgetUltOB(self, merger_row, current_row):
+    def GenBudgetUltOB(self, merger_row, current_row, fieldnames, args):
         '''
         logic for the field
         '''
-        if merger_row['join_indicator'] in ('AB') and merger_row['GenAV_PQ'] and float(merger_row['GenAV_PQ']) > 0:
-            current_row['GenBudgetUltOB'] = merger_row['GenBudgetUltOB_PQ']
-        else:
-            current_row['GenBudgetUltOB'] = merger_row['GenBudgetUltOB_CQ']
+        if 'GenBudgetUltOB' in fieldnames:
+            if merger_row['join_indicator'] == 'AB' and (merger_row['GenAV_PQ'] and float(merger_row['GenAV_PQ']) > 0\
+            and merger_row['GenAV_CQ'] and float(merger_row['GenAV_CQ']) > 0):
+                current_row['GenBudgetUltOB'] = merger_row['GenBudgetUltOB_PQ']
+            else:
+                current_row['GenBudgetUltOB'] = merger_row['GenBudgetUltOB_CQ']
             
         return current_row
             
-    def IdxBudgetStrategyFee(self, merger_row, current_row, index):
+    def IdxBudgetStrategyFee(self, merger_row, current_row, fieldnames, args):
         '''
         logic for the field
         '''
-        if merger_row['join_indicator'] == 'AB' and merger_row['Idx1RecLinkID_CQ'] not in ('',None) and\
-        merger_row[f'_int_idx{index}_anniv'] == 'N':
-            current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{index}BudgetStrategyFee_PQ']
-            current_row[f'Idx{index}BudgetVolAdjOB'] = merger_row[f'Idx{index}BudgetVolAdjOB_PQ']
-            current_row[f'Idx{index}BudgetOBCurr'] = merger_row[f'Idx{index}BudgetOBCurr_PQ']
-            current_row[f'Idx{index}BudgetUltOB'] = merger_row[f'Idx{index}BudgetUltOB_PQ']
-        
-        elif merger_row['join_indicator'] == 'AB' and merger_row['Idx1RecLinkID_CQ'] not in ('',None) and\
-        merger_row[f'_int_idx{index}_anniv'] == 'Y':
-            current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{index}BudgetStrategyFee_PQ']
-            current_row[f'Idx{index}BudgetVolAdjOB'] = merger_row[f'Idx{index}BudgetOBCurr_PQ']
-            current_row[f'Idx{index}BudgetOBCurr'] = merger_row[f'Idx{index}BudgetOBCurr_PQ']
-            current_row[f'Idx{index}BudgetUltOB'] = merger_row[f'Idx{index}BudgetUltOB_PQ']
-        
-        else:
-            current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{index}BudgetStrategyFee_CQ']
-            current_row[f'Idx{index}BudgetVolAdjOB'] = merger_row[f'Idx{index}BudgetVolAdjOB_CQ']
-            current_row[f'Idx{index}BudgetOBCurr'] = merger_row[f'Idx{index}BudgetOBCurr_CQ']
-            current_row[f'Idx{index}BudgetUltOB'] = merger_row[f'Idx{index}BudgetUltOB_CQ']
-        
+        if 'Idx1BudgetStrategyFee' in fieldnames:
+            for index in range(1,6):
+                if args.block == 'amp':
+                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ']
+                else:
+                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ'] + merger_row[f'Idx{index}ANXStrat_CQ']
+                
+                if key != '__' and merger_row['join_indicator'] == 'AB':
+                    idx = eval(merger_row['__idxordersync_pq']).get(key,index)
+                    #print(eval(merger_row['__idxordersync_pq']).get(key,-1))
+                else:
+                    idx = index
+                    
+                if merger_row['join_indicator'] == 'AB' and merger_row['Idx1RecLinkID_CQ'] not in ('',None) and\
+                merger_row[f'_int_idx{idx}_anniv'] == 'N':
+                    current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{idx}BudgetStrategyFee_PQ']
+                    
+                elif merger_row['join_indicator'] == 'AB' and merger_row['Idx1RecLinkID_CQ'] not in ('',None) and\
+                merger_row[f'_int_idx{idx}_anniv'] == 'Y':
+                    current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{idx}BudgetStrategyFee_PQ']
+                    
+                else:
+                    current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{index}BudgetStrategyFee_CQ']
+                    
         return current_row
+    
+    def IdxBudgetVolAdjOB(self, merger_row, current_row, fieldnames, args):
+        '''
+        logic for the field
+        '''
+        if 'Idx1BudgetVolAdjOB' in fieldnames:
+            for index in range(1,6):
+                if args.block == 'amp':
+                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ']
+                else:
+                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ'] + merger_row[f'Idx{index}ANXStrat_CQ']
+               
+                if key != '__' and merger_row['join_indicator'] == 'AB':
+                    idx = eval(merger_row['__idxordersync_pq']).get(key,index)
+                    #print(eval(merger_row['__idxordersync_pq']).get(key,-1))
+                else:
+                    idx = index
+            
+                if merger_row['join_indicator'] == 'AB' and merger_row['Idx1RecLinkID_CQ'] not in ('',None) and\
+                merger_row[f'_int_idx{idx}_anniv'] == 'N':
+                    current_row[f'Idx{index}BudgetVolAdjOB'] = merger_row[f'Idx{idx}BudgetVolAdjOB_PQ']
+                    
+                elif merger_row['join_indicator'] == 'AB' and merger_row['Idx1RecLinkID_CQ'] not in ('',None) and\
+                merger_row[f'_int_idx{idx}_anniv'] == 'Y':
+                    current_row[f'Idx{index}BudgetVolAdjOB'] = merger_row[f'Idx{idx}BudgetOBCurr_PQ']
+                    
+                else:
+                    current_row[f'Idx{index}BudgetVolAdjOB'] = merger_row[f'Idx{index}BudgetVolAdjOB_CQ']
+                    
+        return current_row
+    def IdxBudgetOBCurr(self, merger_row, current_row, fieldnames, args):
+        '''
+        logic for the field
+        '''
+        if 'Idx1BudgetOBCurr' in fieldnames:
+            for index in range(1,6):
+                
+                if args.block == 'amp':
+                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ']
+                else:
+                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ'] + merger_row[f'Idx{index}ANXStrat_CQ']
+                
+                
+                if key != '__' and merger_row['join_indicator'] == 'AB':
+                    idx = eval(merger_row['__idxordersync_pq']).get(key,index)
+                    #print(eval(merger_row['__idxordersync_pq']).get(key,-1))
+                else:
+                    idx = index
+                    
+                if merger_row['join_indicator'] == 'AB' and merger_row['Idx1RecLinkID_CQ'] not in ('',None) and\
+                merger_row[f'_int_idx{idx}_anniv'] == 'N':
+                    current_row[f'Idx{index}BudgetOBCurr'] = merger_row[f'Idx{idx}BudgetOBCurr_PQ']
+                   
+                elif merger_row['join_indicator'] == 'AB' and merger_row['Idx1RecLinkID_CQ'] not in ('',None) and\
+                merger_row[f'_int_idx{idx}_anniv'] == 'Y':
+                    current_row[f'Idx{index}BudgetOBCurr'] = merger_row[f'Idx{idx}BudgetOBCurr_PQ']
+                   
+                else:
+                    current_row[f'Idx{index}BudgetOBCurr'] = merger_row[f'Idx{index}BudgetOBCurr_CQ']
+                    
+        return current_row
+    
+    def IdxBudgetUltOB(self, merger_row, current_row, fieldnames, args):
+        '''
+        logic for the field
+        '''
+        if 'Idx1BudgetUltOB' in fieldnames:
+            for index in range(1,6):
+                
+                if args.block == 'amp':
+                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ']
+                else:
+                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ'] + merger_row[f'Idx{index}ANXStrat_CQ']
+                
+                
+                if key != '__' and merger_row['join_indicator'] == 'AB':
+                    idx = eval(merger_row['__idxordersync_pq']).get(key,index)
+                    #print(eval(merger_row['__idxordersync_pq']).get(key,-1))
+                else:
+                    idx = index
+                    
+                if merger_row['join_indicator'] == 'AB' and merger_row['Idx1RecLinkID_CQ'] not in ('',None) and\
+                merger_row[f'_int_idx{idx}_anniv'] == 'N':
+                    current_row[f'Idx{index}BudgetUltOB'] = merger_row[f'Idx{idx}BudgetUltOB_PQ']
+                
+                elif merger_row['join_indicator'] == 'AB' and merger_row['Idx1RecLinkID_CQ'] not in ('',None) and\
+                merger_row[f'_int_idx{idx}_anniv'] == 'Y':
+                    current_row[f'Idx{index}BudgetUltOB'] = merger_row[f'Idx{idx}BudgetUltOB_PQ']
+                
+                else:
+                    current_row[f'Idx{index}BudgetUltOB'] = merger_row[f'Idx{index}BudgetUltOB_CQ']
+                
+        return current_row
+    
+    def fixed(self, merger_row, current_row, fieldnames, args):
         
-    def idx(self,merrger_row, current_row):
+        if merger_row['join_indicator'] == 'AB' and float(merger_row['F133AVIF_PQ'])>0 and float(merger_row['F133AVIF_CQ']) == 0:
+            
+            fields = ['Idx1BudgetOBCurr', 'Idx1BudgetUltOB', 'Idx1BudgetVolAdjOB', 'Idx1AOptNomMV']
+            if 'Idx1BudgetUltOB' in fieldnames:
+                for i in range(1,6):
+                    current_row[f'Idx{i}BudgetUltOB'] = 0
+            
+            if 'Idx1BudgetOBCurr' in fieldnames:
+                for i in range(1,6):
+                    current_row[f'Idx{i}BudgetOBCurr'] = 0
+                    
+            if 'Idx1BudgetVolAdjOB' in fieldnames:
+                for i in range(1,6):
+                    current_row[f'Idx{i}BudgetVolAdjOB'] = 0
+                    
+            if 'Idx1AOptNomMV' in fieldnames:
+                for i in range(1,6):
+                    current_row[f'Idx{i}AOptNomMV'] = 0
         
-        for i in range(1,6):
-            current_row = self.IdxBudgetStrategyFee(merrger_row, current_row, i)
         return current_row
             
     
-    def generate(self,merge,current_row):
+            
+    
+    def generate(self,merge,current_row,fieldnames, args):
         '''
         Default fields
         '''
-        for fields in order:
+        for fields in fieldnames:
             if fields in ('PolNo', 'Company'):
                 current_row[fields] = merge[fields]
             elif fields not in ['GenBudgetOBCurr','GenBudgetUltOB','Idx1BudgetStrategyFee','Idx2BudgetStrategyFee',\
