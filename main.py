@@ -29,13 +29,8 @@ def main():
 
     parser.add_argument('-v', '--valuation-date',
                         help='date for which the AILs should be generated')
-    parser.add_argument('-s', '--admin-system',
-                        help='name of the source system')
     parser.add_argument('-b', '--block',
                         help='name of the block')
-    
-#     parser.add_argument('-c', '--current-path',
-#                         help='path to the current input AILs')
     parser.add_argument('-m', '--merger-path',
                         help='path to the old input AILs')
     parser.add_argument('-o', '--output',

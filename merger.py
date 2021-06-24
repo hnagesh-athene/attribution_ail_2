@@ -5,10 +5,11 @@ This process will merge all files with matching keyword and write them into a ne
 import argparse
 from core_utils.tabular import FastDictReader
 from collections import OrderedDict
-from Columns import AIL_Columns as order
 from core_utils.tabular import CSVDataIO
 import datetime
 import tqdm
+import csv
+
 
 def reader(file_1, file_2):
         '''
@@ -18,25 +19,24 @@ def reader(file_1, file_2):
         fp_1 = open(file_1)
         fp_2 = open(file_2)
         obj1 = FastDictReader(fp_1, delimiter='\t')
-        fieldnames = order
         obj2 = FastDictReader(fp_2, delimiter='\t')
         return obj1, obj2
     
-def writer(filename):
+def writer(filename,header):
         '''
         writer
         '''
         print('output write')
         write = CSVDataIO(delimiter='\t')
-        cols = prefix_list_pq(order) + prefix_list_cq(order)
+        cols = prefix_list_pq(header) + prefix_list_cq(header)
         file = write.iterative_writer(filename, cols)
         return file
     
-def row_builder():
+def row_builder(header):
         
         
         row = OrderedDict()
-        row = {fields:None for fields in order}
+        row = {fields:None for fields in header}
         
         return row
 
@@ -57,6 +57,17 @@ def prefix_list_cq(row):
     
     return [k+'_CQ' for k in row]
 
+def field_list(filename):
+    
+    #taking fields name from input file
+    with open(filename, 'r') as file:
+        reader_obj = csv.reader(file,delimiter = '\t')
+        for field in reader_obj:
+            header = field
+            break
+        
+    return header
+    
 def Merge():
     """
     Merging previous quarter and current quarter ail's
@@ -78,8 +89,11 @@ def Merge():
     progress = tqdm.tqdm(mininterval=1, unit=' rows', desc='rows checked ')
     previous_row = next(input_1)
     current_row = next(input_2)
-    write_obj = writer(args.output)
-    row = row_builder()
+    
+    header = field_list(args.prev)
+    
+    write_obj = writer(args.output,header)
+    row = row_builder(header)
     row_pq = prefix_dict_pq(row)
     row_cq = prefix_dict_cq(row)
     

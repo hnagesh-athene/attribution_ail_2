@@ -335,4 +335,4 @@ AIL_Columns= [
 'Seed'
 ]
 
-Columns_ail = ['PolNo','Company','join_indicator','days_ann','__idxordersync_pq', '__idxordersync_cq', '_int_idx1_eor','_int_idx2_eor','_int_idx3_eor','_int_idx4_eor','_int_idx5_eor','_int_idx1_anniv','_int_idx2_anniv','_int_idx3_anniv','_int_idx4_anniv','_int_idx5_anniv','index_credit']
+Columns_ail = ['PolNo','Company','join_indicator','__idxordersync_pq', '__idxordersync_cq', '_int_idx1_eor','_int_idx2_eor','_int_idx3_eor','_int_idx4_eor','_int_idx5_eor','_int_idx1_anniv','_int_idx2_anniv','_int_idx3_anniv','_int_idx4_anniv','_int_idx5_anniv','index_credit','_int_idx1_days','_int_idx2_days','_int_idx3_days','_int_idx4_days','_int_idx5_days']
