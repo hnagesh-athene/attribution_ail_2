@@ -1,16 +1,14 @@
 '''
 calculate/transform the required fields depending on admin system
 '''
-
-import tqdm
+import csv
 import datetime
+import tqdm
 from core_utils.core_utils.tabular import FastDictReader
 from core_utils.core_utils.tabular import CSVDataIO
-
 from afdm_attribution_ail.step1 import Step1
 from afdm_attribution_ail.step2 import Step2
 from afdm_attribution_ail.step3 import Step3
-from afdm_attribution_ail.step4 import Step4
 from afdm_attribution_ail.step5 import Step5
 from afdm_attribution_ail.step6 import Step6
 from afdm_attribution_ail.step7 import Step7
@@ -18,13 +16,10 @@ from afdm_attribution_ail.step8 import Step8
 from afdm_attribution_ail.step9 import Step9
 from afdm_attribution_ail.step10 import Step10
 from afdm_attribution_ail.step_ob import OB
-from Columns import AIL_Columns
-from prework import Prework
-from core_utils.dates import shift_date, shift_quarters
-import csv
+from core_utils.dates import shift_quarters
 
 
-class Transform(Prework):
+class Transform:
     '''
     generate step 1- 10 atttribution_ails
     '''
@@ -42,48 +37,50 @@ class Transform(Prework):
                 field_names = field
                 break
         self.fieldnames = field_names
-        self.output_path = 'output/'+args.valuation_date+'/'+r'ail.{}.{}_{}.ail2'
-        #self.output_path = r'\\ag158w\ptsshare\Non_Actuarial\Actuarial_IT\LDTI\Attribution_AIL\Dev_AILs\Output\v7\step[1-10]/'+r'ail.{}.{}_{}.ail2'
-
-        self.steps = self.steps_profile(self.args.admin_system)
+        self.output_path = 'output/'+args.valuation_date+'/'+args.block+'/'+r'ail.{}.{}_{}.ail2'
+        self.steps = self.steps_profile()
         self.changes = self.change_steps()
         self.merger_file = self.reader(self.merger)
         self.writers = self.generate()
         self.transformer(self.merger_file, self.steps)
 
-    def steps_profile(self, admin_system):
+    def steps_profile(self):
         '''
-        define the steps for admin system
+        define the steps for different blocks
         '''
         print('steps_profile')
         if self.args.block == 'fia':
-            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,self.step_7,self.step_6,self.step_5,self.step_3]
+            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,\
+                    self.step_7,self.step_6,self.step_5,self.step_3]
         elif self.args.block == 'anx':
-            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,self.step_7,self.step_6,self.step_5,self.step_3]
+            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,\
+                    self.step_7,self.step_6,self.step_5,self.step_3]
         elif self.args.block == 'amp':
-            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,self.step_8,self.step_8,self.step_8,self.step_8]
+            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,\
+                    self.step_8,self.step_8,self.step_8,self.step_8]
         elif self.args.block == 'tda':
-            return [self.step_1, self.step_2, self.OB, self.OB, self.OB, self.step_7,self.step_6,self.step_6,self.step_3]
+            return [self.step_1, self.step_2, self.OB, self.OB, self.OB, self.step_7,\
+                    self.step_6,self.step_6,self.step_3]
         elif self.args.block == 'ila':
-            return [self.step_1, self.step_2, self.OB, self.OB, self.OB, self.OB, self.OB, self.OB, self.OB]
+            return [self.step_1, self.step_2, self.OB, self.OB, self.OB,\
+                     self.OB, self.OB, self.OB, self.OB]
         
-
     def change_steps(self):
         '''
         get the field names and functions for the respective steps
         '''
         print('steps_change')
-        d=self.args.valuation_date
-        return [Step1(d), Step2(d), Step10(d), Step9(d), Step8(d), Step7(d), Step6(d),Step5(d),Step3(d),OB(d)]
+        return [Step1(), Step2(), Step10(), Step9(), Step8(),\
+                 Step7(), Step6(),Step5(),Step3(),OB()]
 
     def generate(self):
         '''
         read transform and create output files
         '''
         print('generate')
-        return [self.writer('Step1'),self.writer('Step2'),self.writer('Step10'),self.writer('Step9'),
-                self.writer('Step8'),self.writer('Step7'),self.writer('Step6'),self.writer('Step5'),
-                self.writer('Step3')]
+        return [self.writer('Step1'),self.writer('Step2'),self.writer('Step10'),\
+                self.writer('Step9'),self.writer('Step8'),self.writer('Step7'),\
+                self.writer('Step6'),self.writer('Step5'),self.writer('Step3')]
 
     def transformer(self, input_1, steps):
         '''
@@ -93,7 +90,6 @@ class Transform(Prework):
         progress = tqdm.tqdm(mininterval=1, unit=' rows', desc='rows checked ')
         merger_row = next(input_1)
         previous_row = None
-        
         while merger_row:
             try:
                 for idx,func in enumerate(steps):
@@ -103,9 +99,7 @@ class Transform(Prework):
                         temp = previous_row
                     if idx == 4:
                         previous_row = func(merger_row, idx, temp)
-                    
                 merger_row = next(input_1)
-                        
             except StopIteration:
                 break
             progress.update()
@@ -127,8 +121,7 @@ class Transform(Prework):
         print('output write')
         write = CSVDataIO(delimiter='\t')
         cols = self.fieldnames
-        
-        if step == 'Step1' or step == 'Step2':
+        if step in ('Step1','Step2'):
             file = write.iterative_writer(self.output_path.format(self.args.block,self.previous,step), cols)
             return file
         else:
