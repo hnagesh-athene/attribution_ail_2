@@ -4,7 +4,7 @@ main file to generate ails based on admin system
 import argparse
 import datetime
 import os
-from transform import Transform
+from bin.transform import Transform
 
 def parse_timestamp(timestamp):
     """
@@ -33,8 +33,8 @@ def main():
                         help='previous quarter file')
     args = parser.parse_args()
 
-    if not os.path.exists('output/'+args.valuation_date+'/'+args.block):
-        os.mkdir('output/'+args.valuation_date+'/'+args.block)
+    if not os.path.exists('data/output/'+args.valuation_date+'/'+args.block):
+        os.makedirs('data/output/'+args.valuation_date+'/'+args.block)
     Transform(args)
 
 if __name__ == '__main__':

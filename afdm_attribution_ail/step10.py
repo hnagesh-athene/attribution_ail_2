@@ -19,8 +19,7 @@ class Step10:
                           self.IdxBudgetVolAdjOB,
                           self.IdxBudgetOBCurr,
                           self.IdxBudgetUltOB,
-                          self.generate,
-                          self.fixed]
+                          self.generate]
         
     def row_builder(self,merger_row, current_row, fieldnames, args):
         """
@@ -70,9 +69,11 @@ class Step10:
                     idx = eval(merger_row['__idxordersync_pq']).get(key,index)
                 else:
                     idx = index
-                if merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{idx}_anniv'] == 'N':
+                if merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_'\
+                and merger_row[f'_int_idx{idx}_anniv'] == 'N':
                     current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{idx}BudgetStrategyFee_PQ']
-                elif merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{idx}_anniv'] == 'Y':
+                elif merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_'\
+                and  merger_row[f'_int_idx{idx}_anniv'] == 'Y':
                     current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{idx}BudgetStrategyFee_PQ']
                 else:
                     current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{index}BudgetStrategyFee_CQ']
@@ -93,9 +94,11 @@ class Step10:
                     idx = eval(merger_row['__idxordersync_pq']).get(key,index)
                 else:
                     idx = index
-                if merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{idx}_anniv'] == 'N':
+                if merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_'\
+                and merger_row[f'_int_idx{idx}_anniv'] == 'N':
                     current_row[f'Idx{index}BudgetVolAdjOB'] = merger_row[f'Idx{idx}BudgetVolAdjOB_PQ']
-                elif merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{idx}_anniv'] == 'Y':
+                elif merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_'\
+                and merger_row[f'_int_idx{idx}_anniv'] == 'Y':
                     current_row[f'Idx{index}BudgetVolAdjOB'] = merger_row[f'Idx{idx}BudgetOBCurr_PQ']
                 else:
                     current_row[f'Idx{index}BudgetVolAdjOB'] = merger_row[f'Idx{index}BudgetVolAdjOB_CQ']      
@@ -116,9 +119,11 @@ class Step10:
                     idx = eval(merger_row['__idxordersync_pq']).get(key,index)
                 else:
                     idx = index
-                if merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{idx}_anniv'] == 'N':
+                if merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_'\
+                and merger_row[f'_int_idx{idx}_anniv'] == 'N':
                     current_row[f'Idx{index}BudgetOBCurr'] = merger_row[f'Idx{idx}BudgetOBCurr_PQ']
-                elif merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{idx}_anniv'] == 'Y':
+                elif merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_'\
+                and merger_row[f'_int_idx{idx}_anniv'] == 'Y':
                     current_row[f'Idx{index}BudgetOBCurr'] = merger_row[f'Idx{idx}BudgetOBCurr_PQ']
                 else:
                     current_row[f'Idx{index}BudgetOBCurr'] = merger_row[f'Idx{index}BudgetOBCurr_CQ']
@@ -139,32 +144,14 @@ class Step10:
                     idx = eval(merger_row['__idxordersync_pq']).get(key,index)
                 else:
                     idx = index
-                if merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{idx}_anniv'] == 'N':
+                if merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_'\
+                and merger_row[f'_int_idx{idx}_anniv'] == 'N':
                     current_row[f'Idx{index}BudgetUltOB'] = merger_row[f'Idx{idx}BudgetUltOB_PQ']
-                elif merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{idx}_anniv'] == 'Y':
+                elif merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_'\
+                and merger_row[f'_int_idx{idx}_anniv'] == 'Y':
                     current_row[f'Idx{index}BudgetUltOB'] = merger_row[f'Idx{idx}BudgetUltOB_PQ']
                 else:
                     current_row[f'Idx{index}BudgetUltOB'] = merger_row[f'Idx{index}BudgetUltOB_CQ']
-        return current_row
-    
-    def fixed(self, merger_row, current_row, fieldnames, args):
-        """
-        populating fields with fixed strategies with default value
-        """
-        if merger_row['join_indicator'] == 'AB' and float(merger_row['F133AVIF_PQ'])>0\
-         and float(merger_row['F133AVIF_CQ']) == 0:
-            if 'Idx1BudgetUltOB' in fieldnames:
-                for i in range(1,6):
-                    current_row[f'Idx{i}BudgetUltOB'] = 0
-            if 'Idx1BudgetOBCurr' in fieldnames:
-                for i in range(1,6):
-                    current_row[f'Idx{i}BudgetOBCurr'] = 0
-            if 'Idx1BudgetVolAdjOB' in fieldnames:
-                for i in range(1,6):
-                    current_row[f'Idx{i}BudgetVolAdjOB'] = 0
-            if 'Idx1AOptNomMV' in fieldnames:
-                for i in range(1,6):
-                    current_row[f'Idx{i}AOptNomMV'] = 0
         return current_row
             
     def generate(self,merge,current_row,fieldnames, args):

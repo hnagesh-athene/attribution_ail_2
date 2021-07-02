@@ -4,7 +4,9 @@ import datetime
 from collections import OrderedDict, defaultdict
 import tqdm
 import xlrd
-from Columns import Columns_ail
+from columns import Columns_ail
+import sys
+sys.path.insert(0, '../core_utils')
 from core_utils.dates import shift_date
 
 

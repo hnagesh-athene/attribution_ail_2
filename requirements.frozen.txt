@@ -1,0 +1,4 @@
+-e core_utils/
+dateutils==0.6.7
+tqdm==4.44.1
+xlrd==1.2.0

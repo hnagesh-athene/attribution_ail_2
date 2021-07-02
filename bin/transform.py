@@ -4,8 +4,11 @@ calculate/transform the required fields depending on admin system
 import csv
 import datetime
 import tqdm
-from core_utils.core_utils.tabular import FastDictReader
-from core_utils.core_utils.tabular import CSVDataIO
+import sys
+sys.path.insert(0, './core_utils')
+from core_utils.tabular import FastDictReader
+from core_utils.tabular import CSVDataIO
+from core_utils.dates import shift_quarters
 from afdm_attribution_ail.step1 import Step1
 from afdm_attribution_ail.step2 import Step2
 from afdm_attribution_ail.step3 import Step3
@@ -16,7 +19,6 @@ from afdm_attribution_ail.step8 import Step8
 from afdm_attribution_ail.step9 import Step9
 from afdm_attribution_ail.step10 import Step10
 from afdm_attribution_ail.step_ob import OB
-from core_utils.dates import shift_quarters
 
 
 class Transform:
@@ -37,7 +39,7 @@ class Transform:
                 field_names = field
                 break
         self.fieldnames = field_names
-        self.output_path = 'output/'+args.valuation_date+'/'+args.block+'/'+r'ail.{}.{}_{}.ail2'
+        self.output_path = 'data/output/'+args.valuation_date+'/'+args.block+'/'+r'ail.{}.{}_{}.ail2'
         self.steps = self.steps_profile()
         self.changes = self.change_steps()
         self.merger_file = self.reader(self.merger)

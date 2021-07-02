@@ -7,6 +7,8 @@ from collections import OrderedDict
 import csv
 import datetime
 import tqdm
+import sys
+sys.path.insert(0, '../core_utils')
 from core_utils.tabular import FastDictReader
 from core_utils.tabular import CSVDataIO
 
