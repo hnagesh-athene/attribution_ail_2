@@ -1,7 +1,6 @@
 '''
 transformation step-10
 '''
-from collections import OrderedDict
 
 class Step10:
     '''
@@ -12,23 +11,13 @@ class Step10:
         define fields to be modified in step 10
         '''
         print('Step 10 class')
-        self.functions = [self.row_builder,
-                          self.GenBudgetOBCurr,
+        self.functions = [self.GenBudgetOBCurr,
                           self.GenBudgetUltOB,
                           self.IdxBudgetStrategyFee,
                           self.IdxBudgetVolAdjOB,
                           self.IdxBudgetOBCurr,
                           self.IdxBudgetUltOB,
                           self.generate]
-        
-    def row_builder(self,merger_row, current_row, fieldnames, args):
-        """
-        default row
-        """
-        self.row = OrderedDict()
-        self.row = {fields:None for fields in fieldnames}
-        
-        return self.row
 
     def GenBudgetOBCurr(self, merger_row, current_row, fieldnames, args):
         '''
@@ -161,11 +150,11 @@ class Step10:
         for fields in fieldnames:
             if fields in ('PolNo', 'Company'):
                 current_row[fields] = merge[fields]
-            elif fields not in ['GenBudgetOBCurr','GenBudgetUltOB','Idx1BudgetStrategyFee',\
-            'Idx2BudgetStrategyFee','Idx3BudgetStrategyFee','Idx4BudgetStrategyFee','Idx15BudgetStrategyFee',\
-            'Idx1BudgetOBCurr','Idx2BudgetOBCurr','Idx3BudgetOBCurr','Idx4BudgetOBCurr',\
-            'Idx5BudgetOBCurr','Idx1BudgetUltOB','Idx2BudgetUltOB','Idx3BudgetUltOB',\
-            'Idx4BudgetUltOB','Idx5BudgetUltOB','Idx1BudgetVolAdjOB','Idx2BudgetVolAdjOB',\
+            elif fields not in ['GenBudgetOBCurr','GenBudgetUltOB','Idx1BudgetStrategyFee',
+            'Idx2BudgetStrategyFee','Idx3BudgetStrategyFee','Idx4BudgetStrategyFee','Idx15BudgetStrategyFee',
+            'Idx1BudgetOBCurr','Idx2BudgetOBCurr','Idx3BudgetOBCurr','Idx4BudgetOBCurr',
+            'Idx5BudgetOBCurr','Idx1BudgetUltOB','Idx2BudgetUltOB','Idx3BudgetUltOB',
+            'Idx4BudgetUltOB','Idx5BudgetUltOB','Idx1BudgetVolAdjOB','Idx2BudgetVolAdjOB',
             'Idx3BudgetVolAdjOB','Idx4BudgetVolAdjOB','Idx5BudgetVolAdjOB']:
             
                 current_row[fields] = merge[fields+'_CQ']

@@ -1,7 +1,6 @@
 '''
 transformation step-1
 '''
-from collections import OrderedDict
 
 class Step1:
     '''
@@ -12,16 +11,9 @@ class Step1:
         define fields to be modified in step 1
         '''
         print('Step 1 class')
-        self.functions = [self.row_builder,
-                          self.IdxAOptNomMV,
+        self.functions = [self.IdxAOptNomMV,
                           self.generate]
         
-    def row_builder(self,merger_row, current_row, fieldnames):
-        
-        self.row = OrderedDict()
-        self.row = {fields:None for fields in fieldnames}
-        return self.row
-    
     def IdxAOptNomMV(self, merge, previous_row, fieldnames):
         '''
         logic for the field
@@ -52,7 +44,7 @@ class Step1:
                 previous_row[fields] = merge[fields]
             elif merge['Company'] == 'CU':
                 previous_row[fields] = merge[fields+'_PQ']
-            elif fields not in ['Idx1AOptNomMV', 'Idx5AOptNomMV', 'Idx2AOptNomMV',\
+            elif fields not in ['Idx1AOptNomMV', 'Idx5AOptNomMV', 'Idx2AOptNomMV',
                                  'Idx3AOptNomMV', 'Idx4AOptNomMV']:
                 previous_row[fields] = merge[fields+'_PQ']
         return previous_row

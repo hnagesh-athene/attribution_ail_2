@@ -1,13 +1,14 @@
 import argparse
 import csv
 import datetime
-from collections import OrderedDict, defaultdict
 import tqdm
 import xlrd
 from columns import Columns_ail
 import sys
 sys.path.insert(0, '../core_utils')
 from core_utils.dates import shift_date
+from core_utils.tabular import tsv_io
+
 
 
 class INTOutput():
@@ -18,17 +19,15 @@ class INTOutput():
         Initialization of required instance variables is done,
         These variable are instantiated and used repeatedly throughout the class.
         """
-        self.orecord = OrderedDict()
         self.args = args
         if self.args.block == 'amp':
-            field_list = Columns_ail+['Idx1TermStart_PQ','Idx2TermStart_PQ','Idx3TermStart_PQ',\
-                                      'Idx4TermStart_PQ','Idx5TermStart_PQ','Idx1TermStart_CQ',\
-                                      'Idx2TermStart_CQ','Idx3TermStart_CQ','Idx4TermStart_CQ',\
+            field_list = Columns_ail+['Idx1TermStart_PQ','Idx2TermStart_PQ','Idx3TermStart_PQ',
+                                      'Idx4TermStart_PQ','Idx5TermStart_PQ','Idx1TermStart_CQ',
+                                      'Idx2TermStart_CQ','Idx3TermStart_CQ','Idx4TermStart_CQ',
                                       'Idx5TermStart_CQ']
         else:
             field_list = Columns_ail
-        for i in field_list:
-            self.orecord[i] = ''
+        self.orecord = {fields:None for fields in field_list}
         self.irecord = {**irecord, **self.orecord}
         self.avrf = avrf_reader_dict
         self.EOR_Assumptions = EOR_Assumptions_reader_dict
@@ -73,24 +72,27 @@ class INTOutput():
         return self
 
     def idxordersync_pq(self):
-
-        idx = defaultdict(int)
+        '''
+        dictionary to keep track of strategies of previous quarter
+        '''
+        idx = {}
         if self.irecord['join_indicator'] in ('AB', 'B'):
             for i in range(1, 6):
                 if self.args.block == 'amp':
-                    key = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[
-                        f'Idx{i}RecLinkID_PQ']
+                    key = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ']
                 else:
                     key = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ'] +\
                      self.irecord[f'Idx{i}ANXStrat_PQ']
                 idx[key] = i
-            self.irecord['__idxordersync_pq'] = dict(idx)
+            self.irecord['__idxordersync_pq'] = idx
 
         return self
 
     def idxordersync_cq(self):
-
-        idx = defaultdict(int)
+        '''
+        dictionary to keep track of strategies of current quarter
+        '''
+        idx = {}
         if self.irecord['join_indicator'] in ('AB', 'A'):
             for i in range(1, 6):
                 if self.args.block == 'amp':
@@ -99,12 +101,14 @@ class INTOutput():
                     key = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ'] +\
                      self.irecord[f'Idx{i}ANXStrat_CQ']
                 idx[key] = i
-            self.irecord['__idxordersync_cq'] = dict(idx)
+            self.irecord['__idxordersync_cq'] = idx
 
         return self
 
     def get_eor(self, index):
-
+        '''
+        gets eor value for all index
+        '''
         if self.irecord['join_indicator'] in ('AB','B') and  float(self.irecord['Idx{}Term_PQ'.format(index)]) == 1\
         and float(self.irecord['Idx{}CapRate_PQ'.format(index)]) >= 0:
             if (self.irecord['Company'] != "AMP" and float(self.irecord['Idx{}CapRate_PQ'.format(index)]) > 1) or \
@@ -151,8 +155,7 @@ class INTOutput():
                 if self.avrf[self.irecord['PolNo']] == '' or self.avrf[self.irecord['PolNo']] <= 0:
                     self.irecord['index_credit'] = 0
                 else:
-                    self.irecord['index_credit'] = self.avrf[
-                        self.irecord['PolNo']]
+                    self.irecord['index_credit'] = self.avrf[self.irecord['PolNo']]
             else:
                 self.irecord['index_credit'] = 0
         return self
@@ -188,7 +191,7 @@ class INTOutput():
             else:
                 return 'N'
 
-    def IdxTermStart(self):
+    def idxTermStart(self):
 
         valdate = datetime.datetime.strptime(self.args.valuation,'%Y%m%d').date()
         if self.args.block == 'amp':
@@ -258,7 +261,7 @@ def execute_attribute(row, avrf_reader_dict, EOR_Assumptions_reader_dict,
         .joint_indicator()\
         .idxordersync_pq()\
         .idxordersync_cq()\
-        .IdxTermStart()\
+        .idxTermStart()\
         .idx_eor()\
         .anniv()\
         .days_ann()\
@@ -350,29 +353,20 @@ def generate_ail():
                                                             if avrf_reader_dict[row['PolicyNumber']] != '' else 0)\
                                                             + float(row['IndexCredit'] if row['IndexCredit'] != '' else 0)
             else:
-                avrf_reader_dict[row['PolicyNumber']] = float(
-                    row['IndexCredit'] if row['IndexCredit'] != '' else 0)
+                avrf_reader_dict[row['PolicyNumber']] = float(row['IndexCredit'] if row['IndexCredit'] != '' else 0)
 
-    with open(args.merge_file, 'r') as file:
-        reader_obj = csv.reader(file, delimiter='\t')
-        for field in reader_obj:
-            header = field
-            break
+    header = tsv_io.read_header(args.merge_file)
     header.remove('PolNo_PQ')
     header.remove('PolNo_CQ')
     header.remove('Company_PQ')
     header.remove('Company_CQ')
-
-    with open(args.prev, 'r') as file:
-        reader_obj = csv.reader(file, delimiter='\t')
-        for field in reader_obj:
-            field_names = field
-            break
-
+    
+    field_names = tsv_io.read_header(args.prev)
+    
     if args.block == 'amp':
-        field_list = Columns_ail+['Idx1TermStart_PQ','Idx2TermStart_PQ','Idx3TermStart_PQ',\
-                                  'Idx4TermStart_PQ','Idx5TermStart_PQ','Idx1TermStart_CQ',\
-                                  'Idx2TermStart_CQ','Idx3TermStart_CQ','Idx4TermStart_CQ',\
+        field_list = Columns_ail+['Idx1TermStart_PQ','Idx2TermStart_PQ','Idx3TermStart_PQ',
+                                  'Idx4TermStart_PQ','Idx5TermStart_PQ','Idx1TermStart_CQ',
+                                  'Idx2TermStart_CQ','Idx3TermStart_CQ','Idx4TermStart_CQ',
                                   'Idx5TermStart_CQ']
     else:
         field_list = Columns_ail

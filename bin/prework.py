@@ -10,10 +10,10 @@ class Prework:
 #         pre process steps
 #         '''
 #         self.args=args
-#         self.stratagies_work()
+#         self.strategies_work()
 #         self.rec_link_id()
         
-    def stratagies_work(self):
+    def strategies_work(self):
         '''
         stratagies pre processing
         '''

@@ -3,14 +3,12 @@ This process will merge all files with matching keyword and write them into a ne
 """
 
 import argparse
-from collections import OrderedDict
 import csv
 import datetime
 import tqdm
 import sys
 sys.path.insert(0, '../core_utils')
-from core_utils.tabular import FastDictReader
-from core_utils.tabular import CSVDataIO
+from core_utils.tabular import tsv_io
 
 
 def reader(file_1, file_2):
@@ -20,8 +18,8 @@ def reader(file_1, file_2):
     print("reader")
     fp_1 = open(file_1)
     fp_2 = open(file_2)
-    obj1 = FastDictReader(fp_1, delimiter="\t")
-    obj2 = FastDictReader(fp_2, delimiter="\t")
+    obj1 = tsv_io.read_file(file_1)
+    obj2 = tsv_io.read_file(file_2)
     return obj1, obj2
 
 
@@ -30,18 +28,9 @@ def writer(filename, header):
     writer
     """
     print("output write")
-    write = CSVDataIO(delimiter="\t")
     cols = prefix_list_pq(header) + prefix_list_cq(header)
-    file = write.iterative_writer(filename, cols)
+    file = tsv_io.iterative_writer(filename, cols)
     return file
-
-
-def row_builder(header):
-
-    row = OrderedDict()
-    row = {fields: None for fields in header}
-
-    return row
 
 
 def prefix_dict_pq(row):
@@ -63,20 +52,7 @@ def prefix_list_cq(row):
 
     return [k + "_CQ" for k in row]
 
-
-def field_list(filename):
-
-    # taking fields name from input file
-    with open(filename, "r") as file:
-        reader_obj = csv.reader(file, delimiter="\t")
-        for field in reader_obj:
-            header = field
-            break
-
-    return header
-
-
-def Merge():
+def merge():
     """
     Merging previous quarter and current quarter ail's
     """
@@ -95,10 +71,10 @@ def Merge():
     previous_row = next(input_1)
     current_row = next(input_2)
 
-    header = field_list(args.prev)
+    header = tsv_io.read_header(args.prev)
 
     write_obj = writer(args.output, header)
-    row = row_builder(header)
+    row = {fields:None for fields in header}
     row_pq = prefix_dict_pq(row)
     row_cq = prefix_dict_cq(row)
 
@@ -155,6 +131,7 @@ def Merge():
         progress.update()
 
 
-st = datetime.datetime.now()
-Merge()
-print("total time-taken = ", datetime.datetime.now() - st)
+if __name__ == '__main__':
+    st = datetime.datetime.now()
+    merge()
+    print("total time-taken = ", datetime.datetime.now() - st)

@@ -6,8 +6,7 @@ import datetime
 import tqdm
 import sys
 sys.path.insert(0, './core_utils')
-from core_utils.tabular import FastDictReader
-from core_utils.tabular import CSVDataIO
+from core_utils.tabular import tsv_io
 from core_utils.dates import shift_quarters
 from afdm_attribution_ail.step1 import Step1
 from afdm_attribution_ail.step2 import Step2
@@ -44,7 +43,9 @@ class Transform:
         self.changes = self.change_steps()
         self.merger_file = self.reader(self.merger)
         self.writers = self.generate()
+        self.row = {fields:None for fields in self.fieldnames}
         self.transformer(self.merger_file, self.steps)
+        
 
     def steps_profile(self):
         '''
@@ -52,27 +53,27 @@ class Transform:
         '''
         print('steps_profile')
         if self.args.block == 'fia':
-            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,\
+            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,
                     self.step_7,self.step_6,self.step_5,self.step_3]
         elif self.args.block == 'anx':
-            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,\
+            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,
                     self.step_7,self.step_6,self.step_5,self.step_3]
         elif self.args.block == 'amp':
-            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,\
+            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,
                     self.step_8,self.step_8,self.step_8,self.step_8]
         elif self.args.block == 'tda':
-            return [self.step_1, self.step_2, self.OB, self.OB, self.OB, self.step_7,\
+            return [self.step_1, self.step_2, self.OB, self.OB, self.OB, self.step_7,
                     self.step_6,self.step_6,self.step_3]
         elif self.args.block == 'ila':
-            return [self.step_1, self.step_2, self.OB, self.OB, self.OB,\
-                     self.OB, self.OB, self.OB, self.OB]
+            return [self.step_1, self.step_2, self.OB, self.OB, self.OB, self.OB,
+                     self.OB, self.OB, self.OB]
         
     def change_steps(self):
         '''
         get the field names and functions for the respective steps
         '''
         print('steps_change')
-        return [Step1(), Step2(), Step10(), Step9(), Step8(),\
+        return [Step1(), Step2(), Step10(), Step9(), Step8(),
                  Step7(), Step6(),Step5(),Step3(),OB()]
 
     def generate(self):
@@ -80,8 +81,8 @@ class Transform:
         read transform and create output files
         '''
         print('generate')
-        return [self.writer('Step1'),self.writer('Step2'),self.writer('Step10'),\
-                self.writer('Step9'),self.writer('Step8'),self.writer('Step7'),\
+        return [self.writer('Step1'),self.writer('Step2'),self.writer('Step10'),
+                self.writer('Step9'),self.writer('Step8'),self.writer('Step7'),
                 self.writer('Step6'),self.writer('Step5'),self.writer('Step3')]
 
     def transformer(self, input_1, steps):
@@ -112,8 +113,7 @@ class Transform:
         reader
         '''
         print('reader')
-        fp_1 = open(file_1)
-        obj1 = FastDictReader(fp_1, delimiter='\t')
+        obj1 = tsv_io.read_file(file_1)
         return obj1
 
     def writer(self, step):
@@ -121,13 +121,12 @@ class Transform:
         writer
         '''
         print('output write')
-        write = CSVDataIO(delimiter='\t')
         cols = self.fieldnames
         if step in ('Step1','Step2'):
-            file = write.iterative_writer(self.output_path.format(self.args.block,self.previous,step), cols)
+            file = tsv_io.iterative_writer(self.output_path.format(self.args.block,self.previous,step), cols)
             return file
         else:
-            file = write.iterative_writer(self.output_path.format(self.args.block,self.args.valuation_date,step), cols)
+            file = tsv_io.iterative_writer(self.output_path.format(self.args.block,self.args.valuation_date,step), cols)
             return file
 
     def step_1(self, merger_row,idx, previous_row=None):
@@ -137,6 +136,7 @@ class Transform:
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'B'):
                 for change in self.changes[0].functions:
+                    previous_row = self.row
                     previous_row = change(merger_row,previous_row,self.fieldnames)
                 self.writers[idx].send(previous_row)
         return previous_row
@@ -234,6 +234,7 @@ class Transform:
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
                 for change in self.changes[2].functions:
+                    current_row = self.row
                     current_row = change(merger_row, current_row,self.fieldnames,self.args)
                 self.writers[idx].send(current_row)
         return current_row
@@ -245,6 +246,7 @@ class Transform:
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
                 for change in self.changes[9].functions:
+                    current_row = self.row
                     current_row = change(merger_row, current_row,self.fieldnames)
                 self.writers[idx].send(current_row)
         return current_row

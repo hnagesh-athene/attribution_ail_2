@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 
 class OB:
     """
@@ -12,19 +10,11 @@ class OB:
         """
         print("other blocks")
         self.functions = [
-            self.row_builder,
             self.GenBudgetOBCurr,
             self.GenBudgetUltOB,
             self.generate,
             self.fixed,
         ]
-
-    def row_builder(self, merger_row, current_row, fieldnames):
-
-        self.row = OrderedDict()
-        self.row = {fields: None for fields in fieldnames}
-
-        return self.row
 
     def GenBudgetOBCurr(self, merger_row, current_row, fieldnames):
 
