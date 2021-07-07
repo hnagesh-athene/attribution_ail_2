@@ -3,8 +3,10 @@ calculate/transform the required fields depending on admin system
 '''
 import csv
 import datetime
-import tqdm
 import sys
+
+import tqdm
+
 sys.path.insert(0, './core_utils')
 from core_utils.tabular import tsv_io
 from core_utils.dates import shift_quarters
@@ -24,28 +26,23 @@ class Transform:
     '''
     generate step 1- 10 atttribution_ails
     '''
+
     def __init__(self, args):
         '''
         initialize the class object
         '''
         self.args = args
-        valdate = datetime.datetime.strptime(self.args.valuation_date,'%Y%m%d').date()
-        self.previous = ''.join(str(shift_quarters(valdate,-1)).split('-'))
+        valdate = datetime.datetime.strptime(self.args.valuation_date, '%Y%m%d').date()
+        self.previous = ''.join(str(shift_quarters(valdate, -1)).split('-'))
         self.merger = args.merger_path
-        with open(args.prev, 'r') as file:
-            reader_obj = csv.reader(file,delimiter = '\t')
-            for field in reader_obj:
-                field_names = field
-                break
-        self.fieldnames = field_names
-        self.output_path = 'data/output/'+args.valuation_date+'/'+args.block+'/'+r'ail.{}.{}_{}.ail2'
+        self.fieldnames = tsv_io.read_header(args.prev)
+        self.output_path = 'data/output/' + args.valuation_date + '/' + args.block + '/' + r'ail.{}.{}_{}.ail2'
         self.steps = self.steps_profile()
         self.changes = self.change_steps()
         self.merger_file = self.reader(self.merger)
         self.writers = self.generate()
-        self.row = {fields:None for fields in self.fieldnames}
+        self.row = {fields: None for fields in self.fieldnames}
         self.transformer(self.merger_file, self.steps)
-        
 
     def steps_profile(self):
         '''
@@ -53,37 +50,37 @@ class Transform:
         '''
         print('steps_profile')
         if self.args.block == 'fia':
-            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,
-                    self.step_7,self.step_6,self.step_5,self.step_3]
+            return [self.step_1, self.step_2, self.step_10, self.step_9, self.step_8,
+                    self.step_7, self.step_6, self.step_5, self.step_3]
         elif self.args.block == 'anx':
-            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,
-                    self.step_7,self.step_6,self.step_5,self.step_3]
+            return [self.step_1, self.step_2, self.step_10, self.step_9, self.step_8,
+                    self.step_7, self.step_6, self.step_5, self.step_3]
         elif self.args.block == 'amp':
-            return [self.step_1, self.step_2, self.step_10, self.step_9,self.step_8,
-                    self.step_8,self.step_8,self.step_8,self.step_8]
+            return [self.step_1, self.step_2, self.step_10, self.step_9, self.step_8,
+                    self.step_8, self.step_8, self.step_8, self.step_8]
         elif self.args.block == 'tda':
             return [self.step_1, self.step_2, self.OB, self.OB, self.OB, self.step_7,
-                    self.step_6,self.step_6,self.step_3]
+                    self.step_6, self.step_6, self.step_3]
         elif self.args.block == 'ila':
             return [self.step_1, self.step_2, self.OB, self.OB, self.OB, self.OB,
-                     self.OB, self.OB, self.OB]
-        
+                    self.OB, self.OB, self.OB]
+
     def change_steps(self):
         '''
         get the field names and functions for the respective steps
         '''
         print('steps_change')
         return [Step1(), Step2(), Step10(), Step9(), Step8(),
-                 Step7(), Step6(),Step5(),Step3(),OB()]
+                Step7(), Step6(), Step5(), Step3(), OB()]
 
     def generate(self):
         '''
         read transform and create output files
         '''
         print('generate')
-        return [self.writer('Step1'),self.writer('Step2'),self.writer('Step10'),
-                self.writer('Step9'),self.writer('Step8'),self.writer('Step7'),
-                self.writer('Step6'),self.writer('Step5'),self.writer('Step3')]
+        return [self.writer('Step1'), self.writer('Step2'), self.writer('Step10'),
+                self.writer('Step9'), self.writer('Step8'), self.writer('Step7'),
+                self.writer('Step6'), self.writer('Step5'), self.writer('Step3')]
 
     def transformer(self, input_1, steps):
         '''
@@ -95,7 +92,7 @@ class Transform:
         previous_row = None
         while merger_row:
             try:
-                for idx,func in enumerate(steps):
+                for idx, func in enumerate(steps):
                     if idx != 4:
                         previous_row = func(merger_row, idx, previous_row)
                     if idx == 2:
@@ -122,14 +119,15 @@ class Transform:
         '''
         print('output write')
         cols = self.fieldnames
-        if step in ('Step1','Step2'):
-            file = tsv_io.iterative_writer(self.output_path.format(self.args.block,self.previous,step), cols)
+        if step in ('Step1', 'Step2'):
+            file = tsv_io.iterative_writer(self.output_path.format(self.args.block, self.previous, step), cols)
             return file
         else:
-            file = tsv_io.iterative_writer(self.output_path.format(self.args.block,self.args.valuation_date,step), cols)
+            file = tsv_io.iterative_writer(self.output_path.format(self.args.block, self.args.valuation_date, step),
+                                           cols)
             return file
 
-    def step_1(self, merger_row,idx, previous_row=None):
+    def step_1(self, merger_row, idx, previous_row=None):
         '''
         step 1
         '''
@@ -137,17 +135,17 @@ class Transform:
             if merger_row['join_indicator'] in ('AB', 'B'):
                 for change in self.changes[0].functions:
                     previous_row = self.row
-                    previous_row = change(merger_row,previous_row,self.fieldnames)
+                    previous_row = change(merger_row, previous_row, self.fieldnames)
                 self.writers[idx].send(previous_row)
         return previous_row
 
-    def step_2(self, merger_row,idx, previous_row):
+    def step_2(self, merger_row, idx, previous_row):
         '''
         step 2
         '''
         if merger_row['join_indicator'] == 'AB':
             for change in self.changes[1].functions:
-                previous_row = change(merger_row, previous_row,self.fieldnames)
+                previous_row = change(merger_row, previous_row, self.fieldnames)
             self.writers[idx].send(previous_row)
         return previous_row
 
@@ -158,7 +156,7 @@ class Transform:
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
                 for change in self.changes[8].functions:
-                    current_row = change(merger_row, current_row,self.fieldnames)
+                    current_row = change(merger_row, current_row, self.fieldnames)
                 self.writers[idx].send(current_row)
         return current_row
 
@@ -168,7 +166,7 @@ class Transform:
         '''
         if current_row:
             for change in self.changes[3].functions:
-                previous_row = change(previous_row, current_row,self.fieldnames)
+                previous_row = change(previous_row, current_row, self.fieldnames)
             self.writers[idx].send(previous_row)
         return previous_row
 
@@ -179,7 +177,7 @@ class Transform:
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
                 for change in self.changes[7].functions:
-                    current_row = change(merger_row, current_row,self.fieldnames)
+                    current_row = change(merger_row, current_row, self.fieldnames)
                 self.writers[idx].send(current_row)
         return current_row
 
@@ -190,7 +188,7 @@ class Transform:
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
                 for change in self.changes[6].functions:
-                    current_row = change(merger_row, current_row,self.fieldnames)
+                    current_row = change(merger_row, current_row, self.fieldnames)
                 self.writers[idx].send(current_row)
         return current_row
 
@@ -201,7 +199,7 @@ class Transform:
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
                 for change in self.changes[5].functions:
-                    current_row = change(merger_row, current_row,self.fieldnames)
+                    current_row = change(merger_row, current_row, self.fieldnames)
                 self.writers[idx].send(current_row)
         return current_row
 
@@ -212,7 +210,7 @@ class Transform:
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
                 for change in self.changes[4].functions:
-                    current_row = change(merger_row, current_row,self.fieldnames,self.args)
+                    current_row = change(merger_row, current_row, self.fieldnames, self.args)
                 self.writers[idx].send(current_row)
         return current_row
 
@@ -223,7 +221,7 @@ class Transform:
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
                 for change in self.changes[3].functions:
-                    current_row = change(merger_row, current_row,self.fieldnames,self.args)
+                    current_row = change(merger_row, current_row, self.fieldnames, self.args)
                 self.writers[idx].send(current_row)
         return current_row
 
@@ -235,10 +233,10 @@ class Transform:
             if merger_row['join_indicator'] in ('AB', 'A'):
                 for change in self.changes[2].functions:
                     current_row = self.row
-                    current_row = change(merger_row, current_row,self.fieldnames,self.args)
+                    current_row = change(merger_row, current_row, self.fieldnames, self.args)
                 self.writers[idx].send(current_row)
         return current_row
-    
+
     def OB(self, merger_row, idx, current_row=None):
         '''
         step 10
@@ -247,10 +245,10 @@ class Transform:
             if merger_row['join_indicator'] in ('AB', 'A'):
                 for change in self.changes[9].functions:
                     current_row = self.row
-                    current_row = change(merger_row, current_row,self.fieldnames)
+                    current_row = change(merger_row, current_row, self.fieldnames)
                 self.writers[idx].send(current_row)
         return current_row
-    
+
     def write_all(self, previous_row):
         '''
         write directly if no logic is involved
@@ -258,5 +256,3 @@ class Transform:
         for step in self.writers:
             if step:
                 step.send(previous_row)
-
-    

@@ -1,3 +1,6 @@
+"""
+ail fields
+"""
 AIL_Columns = [
     "//ck.Plan",
     "ck.IssAge",
@@ -334,7 +337,9 @@ AIL_Columns = [
     "OrgIssYear",
     "Seed",
 ]
-
+"""
+additional fields
+"""
 Columns_ail = [
     "PolNo",
     "Company",

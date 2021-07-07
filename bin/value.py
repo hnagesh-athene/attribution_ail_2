@@ -1,14 +1,15 @@
 import argparse
 import csv
 import datetime
+import sys
+
 import tqdm
 import xlrd
 from columns import Columns_ail
-import sys
+
 sys.path.insert(0, '../core_utils')
 from core_utils.dates import shift_date
 from core_utils.tabular import tsv_io
-
 
 
 class INTOutput():
@@ -21,13 +22,13 @@ class INTOutput():
         """
         self.args = args
         if self.args.block == 'amp':
-            field_list = Columns_ail+['Idx1TermStart_PQ','Idx2TermStart_PQ','Idx3TermStart_PQ',
-                                      'Idx4TermStart_PQ','Idx5TermStart_PQ','Idx1TermStart_CQ',
-                                      'Idx2TermStart_CQ','Idx3TermStart_CQ','Idx4TermStart_CQ',
-                                      'Idx5TermStart_CQ']
+            field_list = Columns_ail + ['Idx1TermStart_PQ', 'Idx2TermStart_PQ', 'Idx3TermStart_PQ',
+                                        'Idx4TermStart_PQ', 'Idx5TermStart_PQ', 'Idx1TermStart_CQ',
+                                        'Idx2TermStart_CQ', 'Idx3TermStart_CQ', 'Idx4TermStart_CQ',
+                                        'Idx5TermStart_CQ']
         else:
             field_list = Columns_ail
-        self.orecord = {fields:None for fields in field_list}
+        self.orecord = {fields: None for fields in field_list}
         self.irecord = {**irecord, **self.orecord}
         self.avrf = avrf_reader_dict
         self.EOR_Assumptions = EOR_Assumptions_reader_dict
@@ -44,8 +45,8 @@ class INTOutput():
         '''
         maps policy number
         '''
-        self.irecord['PolNo'] = self.irecord['PolNo_PQ'] if self.irecord['PolNo_PQ']\
-        not in ('', None) else self.irecord['PolNo_CQ']
+        self.irecord['PolNo'] = self.irecord['PolNo_PQ'] if self.irecord['PolNo_PQ'] \
+                                                            not in ('', None) else self.irecord['PolNo_CQ']
 
         return self
 
@@ -53,8 +54,8 @@ class INTOutput():
         '''
         maps company name
         '''
-        self.irecord['Company'] = self.irecord['Company_PQ'] if self.irecord['Company_PQ']\
-         not in ('', None) else self.irecord['Company_CQ']
+        self.irecord['Company'] = self.irecord['Company_PQ'] if self.irecord['Company_PQ'] \
+                                                                not in ('', None) else self.irecord['Company_CQ']
 
         return self
 
@@ -81,8 +82,8 @@ class INTOutput():
                 if self.args.block == 'amp':
                     key = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ']
                 else:
-                    key = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ'] +\
-                     self.irecord[f'Idx{i}ANXStrat_PQ']
+                    key = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ'] + \
+                          self.irecord[f'Idx{i}ANXStrat_PQ']
                 idx[key] = i
             self.irecord['__idxordersync_pq'] = idx
 
@@ -98,8 +99,8 @@ class INTOutput():
                 if self.args.block == 'amp':
                     key = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ']
                 else:
-                    key = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ'] +\
-                     self.irecord[f'Idx{i}ANXStrat_CQ']
+                    key = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ'] + \
+                          self.irecord[f'Idx{i}ANXStrat_CQ']
                 idx[key] = i
             self.irecord['__idxordersync_cq'] = idx
 
@@ -109,10 +110,10 @@ class INTOutput():
         '''
         gets eor value for all index
         '''
-        if self.irecord['join_indicator'] in ('AB','B') and  float(self.irecord['Idx{}Term_PQ'.format(index)]) == 1\
-        and float(self.irecord['Idx{}CapRate_PQ'.format(index)]) >= 0:
+        if self.irecord['join_indicator'] in ('AB', 'B') and float(self.irecord['Idx{}Term_PQ'.format(index)]) == 1 \
+                and float(self.irecord['Idx{}CapRate_PQ'.format(index)]) >= 0:
             if (self.irecord['Company'] != "AMP" and float(self.irecord['Idx{}CapRate_PQ'.format(index)]) > 1) or \
-                (self.irecord['Company'] == "AMP" and float(self.irecord['Idx{}CapRate_PQ'.format(index)]) >= 0.15):
+                    (self.irecord['Company'] == "AMP" and float(self.irecord['Idx{}CapRate_PQ'.format(index)]) >= 0.15):
                 return self.EOR_Assumptions['eor1']
             elif float(self.irecord['Idx{}CapRate_PQ'.format(index)]) <= 0.02:
                 return self.EOR_Assumptions['eor2']
@@ -133,14 +134,18 @@ class INTOutput():
             return self.EOR_Assumptions['eor7']
 
     def idx_eor(self):
-
+        '''
+        calculates eor for each index
+        '''
         for index in range(1, 6):
             self.irecord['_int_idx{}_eor'.format(index)] = self.get_eor(index)
 
         return self
 
     def index_credit(self):
-
+        '''
+        maps index credit from avrf
+        '''
         if self.irecord['AdminSystem_PQ'] == 'AS400' or self.irecord['AdminSystem_CQ'] == 'AS400':
             PolNo = self.irecord['PolNo'] + self.suffix.get(self.irecord['Company'])
             if PolNo in self.avrf:
@@ -161,7 +166,9 @@ class INTOutput():
         return self
 
     def anniv(self):
-
+        '''
+        calculates maturity status of strategies
+        '''
         for idx in range(1, 6):
             self.irecord[f'_int_idx{idx}_anniv'] = self.get_anniv(idx)
         return self
@@ -170,30 +177,32 @@ class INTOutput():
         '''
         calculates maturity status of strategy
         '''
-        valdate = datetime.datetime.strptime(self.args.valuation,'%Y%m%d').date()
+        valdate = datetime.datetime.strptime(self.args.valuation, '%Y%m%d').date()
         if self.irecord['join_indicator'] == 'A':
             return 'N'
         elif self.irecord['Company'] == 'CU':
             issue_date_pq = datetime.datetime.strptime(
                 self.irecord['IssueDate_PQ'], '%Y%m%d').date()
-            if issue_date_pq.month == valdate.month or issue_date_pq.month == valdate.month-1\
-               or issue_date_pq.month == valdate.month-2:
+            if issue_date_pq.month == valdate.month or issue_date_pq.month == valdate.month - 1 \
+                    or issue_date_pq.month == valdate.month - 2:
                 return 'Y'
             else:
                 return 'N'
         elif self.irecord['join_indicator'] in ('AB', 'B'):
             issue_date_pq = datetime.datetime.strptime(
                 self.irecord['IssueDate_PQ'], '%Y%m%d').date()
-            maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{idx}TermStart_PQ'])+\
-                                       int(self.irecord[f'Idx{idx}Term_PQ'])*12-1, 0)
+            maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{idx}TermStart_PQ']) + \
+                                       int(self.irecord[f'Idx{idx}Term_PQ']) * 12 - 1, 0)
             if valdate >= maturity_date > shift_date(valdate, 0, -3, 0):
                 return 'Y'
             else:
                 return 'N'
 
     def idxTermStart(self):
-
-        valdate = datetime.datetime.strptime(self.args.valuation,'%Y%m%d').date()
+        '''
+        calculates idxtermstart for amp ail
+        '''
+        valdate = datetime.datetime.strptime(self.args.valuation, '%Y%m%d').date()
         if self.args.block == 'amp':
             for idx in range(1, 6):
                 if self.irecord['join_indicator'] == 'A':
@@ -204,7 +213,7 @@ class INTOutput():
                     self.irecord[f'Idx{idx}TermStart_CQ'] = 1 + term
                 if self.irecord['join_indicator'] in ('AB', 'B'):
                     issue_date_pq = datetime.datetime.strptime(self.irecord['IssueDate_PQ'], '%Y%m%d').date()
-                    maturity_date = shift_date(issue_date_pq, 0,int(self.irecord[f'Idx{idx}Term_PQ']) * 12, 0)
+                    maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{idx}Term_PQ']) * 12, 0)
                     term = 0
                     if 31 >= issue_date_pq.day > 22:
                         term = 1
@@ -216,8 +225,8 @@ class INTOutput():
                     if self.args.block == 'amp':
                         key = self.irecord[f'Idx{idx}Index_CQ'] + self.irecord[f'Idx{idx}RecLinkID_CQ']
                     else:
-                        key = self.irecord[f'Idx{idx}Index_CQ'] + self.irecord[f'Idx{idx}RecLinkID_CQ'] +\
-                        self.irecord[f'Idx{idx}ANXStrat_CQ']
+                        key = self.irecord[f'Idx{idx}Index_CQ'] + self.irecord[f'Idx{idx}RecLinkID_CQ'] + \
+                              self.irecord[f'Idx{idx}ANXStrat_CQ']
 
                     issue_date_pq = datetime.datetime.strptime(
                         self.irecord['IssueDate_PQ'], '%Y%m%d').date()
@@ -225,7 +234,7 @@ class INTOutput():
                     if 31 >= issue_date_pq.day > 22:
                         term = 1
                     index = self.irecord['__idxordersync_pq'].get(key, idx)
-                    maturity_date = shift_date(issue_date_pq, 0,int(self.irecord[f'Idx{index}Term_PQ']) * 12, 0)
+                    maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{index}Term_PQ']) * 12, 0)
                     if maturity_date > shift_date(valdate, 0, -3, 0):
                         self.irecord[f'Idx{idx}TermStart_CQ'] = 1 + term
                     else:
@@ -233,13 +242,15 @@ class INTOutput():
         return self
 
     def days_ann(self):
-
-        valdate = datetime.datetime.strptime(self.args.valuation,'%Y%m%d').date()
+        '''
+        days between maturity and valuation
+        '''
+        valdate = datetime.datetime.strptime(self.args.valuation, '%Y%m%d').date()
         for i in range(1, 6):
             if self.irecord[f'_int_idx{i}_anniv'] == 'Y' and self.irecord['join_indicator'] in ('AB', 'B'):
                 issue_date_pq = datetime.datetime.strptime(self.irecord['IssueDate_PQ'], '%Y%m%d').date()
-                maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{i}TermStart_PQ'])+\
-                                       int(self.irecord[f'Idx{i}Term_PQ'])*12-1, 0)
+                maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{i}TermStart_PQ']) + \
+                                           int(self.irecord[f'Idx{i}Term_PQ']) * 12 - 1, 0)
                 self.irecord[f'_int_idx{i}_days'] = (valdate - maturity_date).days
             else:
                 self.irecord[f'_int_idx{i}_days'] = 1
@@ -256,15 +267,15 @@ def execute_attribute(row, avrf_reader_dict, EOR_Assumptions_reader_dict,
     '''
     afdm = INTOutput(row, avrf_reader_dict, EOR_Assumptions_reader_dict,
                      field_names, args)
-    afdm.policy_number()\
-        .company()\
-        .joint_indicator()\
-        .idxordersync_pq()\
-        .idxordersync_cq()\
-        .idxTermStart()\
-        .idx_eor()\
-        .anniv()\
-        .days_ann()\
+    afdm.policy_number() \
+        .company() \
+        .joint_indicator() \
+        .idxordersync_pq() \
+        .idxordersync_cq() \
+        .idxTermStart() \
+        .idx_eor() \
+        .anniv() \
+        .days_ann() \
         .index_credit()
 
     return afdm.irecord
@@ -279,13 +290,15 @@ def ail_row_processor(avrf_reader_dict, EOR_Assumptions_reader_dict,
         reader1 = csv.DictReader(file, delimiter='\t')
         for row in reader1:
             res = execute_attribute(row, avrf_reader_dict,
-                                  EOR_Assumptions_reader_dict, field_names,
-                                  args)
+                                    EOR_Assumptions_reader_dict, field_names,
+                                    args)
             yield res
 
 
 def generate_ail():
-
+    '''
+    main function
+    '''
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-m', '--merge-file', help='merge filename')
@@ -338,9 +351,9 @@ def generate_ail():
         reader = csv.DictReader(file, delimiter=',')
         for row in reader:
             if row['PolicyNumber'] in avrf_reader_dict:
-                avrf_reader_dict[row['PolicyNumber']] = float(avrf_reader_dict[row['PolicyNumber']]\
-                                                            if avrf_reader_dict[row['PolicyNumber']] != '' else 0)\
-                                                             + float(row['IndexCredit'] if row['IndexCredit'] != '' else 0)
+                avrf_reader_dict[row['PolicyNumber']] = float(avrf_reader_dict[row['PolicyNumber']] \
+                                                                  if avrf_reader_dict[row['PolicyNumber']] != '' else 0) \
+                                                        + float(row['IndexCredit'] if row['IndexCredit'] != '' else 0)
             else:
                 avrf_reader_dict[row['PolicyNumber']] = float(
                     row['IndexCredit'] if row['IndexCredit'] != '' else 0)
@@ -349,9 +362,9 @@ def generate_ail():
         reader = csv.DictReader(file, delimiter=',')
         for row in reader:
             if row['PolicyNumber'] in avrf_reader_dict:
-                avrf_reader_dict[row['PolicyNumber']] = float(avrf_reader_dict[row['PolicyNumber']]\
-                                                            if avrf_reader_dict[row['PolicyNumber']] != '' else 0)\
-                                                            + float(row['IndexCredit'] if row['IndexCredit'] != '' else 0)
+                avrf_reader_dict[row['PolicyNumber']] = float(avrf_reader_dict[row['PolicyNumber']] \
+                                                                  if avrf_reader_dict[row['PolicyNumber']] != '' else 0) \
+                                                        + float(row['IndexCredit'] if row['IndexCredit'] != '' else 0)
             else:
                 avrf_reader_dict[row['PolicyNumber']] = float(row['IndexCredit'] if row['IndexCredit'] != '' else 0)
 
@@ -360,14 +373,14 @@ def generate_ail():
     header.remove('PolNo_CQ')
     header.remove('Company_PQ')
     header.remove('Company_CQ')
-    
+
     field_names = tsv_io.read_header(args.prev)
-    
+
     if args.block == 'amp':
-        field_list = Columns_ail+['Idx1TermStart_PQ','Idx2TermStart_PQ','Idx3TermStart_PQ',
-                                  'Idx4TermStart_PQ','Idx5TermStart_PQ','Idx1TermStart_CQ',
-                                  'Idx2TermStart_CQ','Idx3TermStart_CQ','Idx4TermStart_CQ',
-                                  'Idx5TermStart_CQ']
+        field_list = Columns_ail + ['Idx1TermStart_PQ', 'Idx2TermStart_PQ', 'Idx3TermStart_PQ',
+                                    'Idx4TermStart_PQ', 'Idx5TermStart_PQ', 'Idx1TermStart_CQ',
+                                    'Idx2TermStart_CQ', 'Idx3TermStart_CQ', 'Idx4TermStart_CQ',
+                                    'Idx5TermStart_CQ']
     else:
         field_list = Columns_ail
     rows = tqdm.tqdm(

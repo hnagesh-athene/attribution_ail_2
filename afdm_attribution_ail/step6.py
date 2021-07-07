@@ -2,6 +2,7 @@
 transformation step-6
 """
 
+
 class Step6:
     """
     changes to be made in step 6
@@ -40,8 +41,8 @@ class Step6:
         """
         logic for the field
         """
-        if merger_row['join_indicator'] == 'AB' and merger_row["IRRestartNew_PQ"] not in ("U", "_")\
-         and merger_row["IRRestartNew_CQ"] == "U":
+        if merger_row['join_indicator'] == 'AB' and merger_row["IRRestartNew_PQ"] not in ("U", "_") \
+                and merger_row["IRRestartNew_CQ"] == "U":
             current_row[f"{field}"] = merger_row[f"{field}" + "_PQ"]
         return current_row
 

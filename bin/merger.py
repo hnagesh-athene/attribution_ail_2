@@ -3,10 +3,11 @@ This process will merge all files with matching keyword and write them into a ne
 """
 
 import argparse
-import csv
 import datetime
-import tqdm
 import sys
+
+import tqdm
+
 sys.path.insert(0, '../core_utils')
 from core_utils.tabular import tsv_io
 
@@ -16,8 +17,6 @@ def reader(file_1, file_2):
     reader
     """
     print("reader")
-    fp_1 = open(file_1)
-    fp_2 = open(file_2)
     obj1 = tsv_io.read_file(file_1)
     obj2 = tsv_io.read_file(file_2)
     return obj1, obj2
@@ -34,23 +33,32 @@ def writer(filename, header):
 
 
 def prefix_dict_pq(row):
-
+    """
+    adding pq prefix
+    """
     return {k + "_PQ": v for k, v in row.items()}
 
 
 def prefix_dict_cq(row):
-
+    """
+    adding cq prefix
+    """
     return {k + "_CQ": v for k, v in row.items()}
 
 
 def prefix_list_pq(row):
-
+    """
+    adding pq prefix
+    """
     return [k + "_PQ" for k in row]
 
 
 def prefix_list_cq(row):
-
+    """
+    adding cq prefix
+    """
     return [k + "_CQ" for k in row]
+
 
 def merge():
     """
@@ -74,7 +82,7 @@ def merge():
     header = tsv_io.read_header(args.prev)
 
     write_obj = writer(args.output, header)
-    row = {fields:None for fields in header}
+    row = {fields: None for fields in header}
     row_pq = prefix_dict_pq(row)
     row_cq = prefix_dict_cq(row)
 

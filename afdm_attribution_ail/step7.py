@@ -2,6 +2,7 @@
 transformation step-7
 """
 
+
 class Step7:
     """
     changes to be made in step 7
@@ -19,7 +20,7 @@ class Step7:
         logic for the field
         """
         if "Seed" in fieldnames:
-            if merger_row['join_indicator'] == 'AB' and merger_row["IRRestartNew_PQ"] == merger_row["IRRestartNew_CQ"]\
-             and merger_row["IRRestartNew_CQ"] not in ("_", "U"):
+            if merger_row['join_indicator'] == 'AB' and merger_row["IRRestartNew_PQ"] == merger_row["IRRestartNew_CQ"] \
+                    and merger_row["IRRestartNew_CQ"] not in ("_", "U"):
                 current_row["Seed"] = merger_row["Seed_PQ"]
         return current_row

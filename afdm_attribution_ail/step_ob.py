@@ -1,4 +1,3 @@
-
 class OB:
     """
     changes to be made in step 1
@@ -38,8 +37,8 @@ class OB:
         """
         populating fields with fixed strategies with default value
         """
-        if merger_row["join_indicator"] == "AB" and float(merger_row["F133AVIF_PQ"]) > 0\
-         and float(merger_row["F133AVIF_CQ"]) == 0:
+        if merger_row["join_indicator"] == "AB" and float(merger_row["F133AVIF_PQ"]) > 0 \
+                and float(merger_row["F133AVIF_CQ"]) == 0:
             if "Idx1BudgetUltOB" in fieldnames:
                 for i in range(1, 6):
                     current_row[f"Idx{i}BudgetUltOB"] = 0

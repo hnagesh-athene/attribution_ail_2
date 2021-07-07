@@ -2,6 +2,7 @@
 transformation step-3
 """
 
+
 class Step3:
     """
     changes to be made in step 3
@@ -49,8 +50,9 @@ class Step3:
         """
         logic for the field
         """
-        if merger_row['join_indicator'] == 'AB' and ((merger_row["IRRestartNew_PQ"] != "_" and merger_row["IRRestartNew_CQ"] == "_")\
-         or (merger_row["DBRiderCodeYN_PQ"] == "Y" and current_row["DBRiderCodeYN"] == "N")):
+        if merger_row['join_indicator'] == 'AB' and (
+                (merger_row["IRRestartNew_PQ"] != "_" and merger_row["IRRestartNew_CQ"] == "_") \
+                or (merger_row["DBRiderCodeYN_PQ"] == "Y" and current_row["DBRiderCodeYN"] == "N")):
             current_row[f"{field}"] = merger_row[f"{field}" + "_PQ"]
 
         return current_row

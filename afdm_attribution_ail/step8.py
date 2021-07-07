@@ -2,6 +2,7 @@
 transformation step-8
 """
 
+
 class Step8:
     """
     changes to be made in step 8
@@ -36,8 +37,8 @@ class Step8:
                 if args.block == "amp":
                     key = merger_row[f"Idx{index}Index_CQ"] + merger_row[f"Idx{index}RecLinkID_CQ"]
                 else:
-                    key = merger_row[f"Idx{index}Index_CQ"] + merger_row[f"Idx{index}RecLinkID_CQ"]\
-                     + merger_row[f"Idx{index}ANXStrat_CQ"]
+                    key = merger_row[f"Idx{index}Index_CQ"] + merger_row[f"Idx{index}RecLinkID_CQ"] \
+                          + merger_row[f"Idx{index}ANXStrat_CQ"]
 
                 if key != "__" and merger_row["join_indicator"] == "AB":
                     idx = eval(merger_row["__idxordersync_pq"]).get(key, index)
@@ -46,4 +47,3 @@ class Step8:
                 current_row = self.idxAOptNomMV(merger_row, current_row, index, idx)
 
         return current_row
-
