@@ -1,0 +1,6 @@
+[submodule "core_utils"]
+	path = core_utils
+	url = https://git.onintranet.com/scm/ac/core_utils.git
+[submodule "ail_mesh"]
+	path = ail_mesh
+	url = https://git.onintranet.com/scm/ac/ail_mesh.git
