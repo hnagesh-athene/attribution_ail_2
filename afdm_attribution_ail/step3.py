@@ -14,7 +14,6 @@ class Step3:
         """
         self.functions = [self.step_3]
         self.fields = [
-            "DBRiderCodeYN",
             "RiderCodeYN",
             "ReportingGroup",
             "CohortKey",
@@ -44,6 +43,7 @@ class Step3:
             "AdditionalRestartMonths",
             "RestartCharge",
             "Seed",
+            "DBRiderCodeYN"
         ]
 
     def step_3_functions(self, merger_row, current_row, field):
