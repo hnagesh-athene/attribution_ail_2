@@ -4,8 +4,12 @@ main file to generate ails based on admin system
 import argparse
 import datetime
 import os
+import traceback
 
 from bin.transform import Transform
+from bin.log_utils import logger
+from core_utils.log import ConsoleLogOutput, FileLogOutput
+
 
 
 def parse_timestamp(timestamp):
@@ -37,7 +41,19 @@ def main():
 
     if not os.path.exists('data/output/' + args.valuation_date + '/' + args.block):
         os.makedirs('data/output/' + args.valuation_date + '/' + args.block)
-    Transform(args)
+    
+    if not os.path.exists('logs/'+args.valuation_date+'/'+args.block):
+        os.makedirs('logs/'+args.valuation_date+'/'+args.block)
+    console_output = ConsoleLogOutput()
+    failure_output = FileLogOutput('logs/'+args.valuation_date+'/'+args.block+'/'+'step.error.log')
+    logger.add_output(console_output, 'info', 'error', 'critical')
+    logger.add_output(failure_output, 'error', 'critical')
+    
+    try:
+        Transform(args)
+    except Exception as e:
+        logger.error(traceback.format_exc())
+
 
 
 if __name__ == '__main__':
