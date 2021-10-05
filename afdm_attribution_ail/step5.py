@@ -21,21 +21,9 @@ class Step5:
             "AdditionalRestartMonths",
             "RestartCharge",
             "Seed",
+            "IRRestartNew"
         ]
-        self.functions = [self.step_5, self.IRRestartNew]
-
-    def IRRestartNew(self, merger_row, current_row, fieldnames):
-        """
-        logic for the field
-        """
-        if "IRRestartNew" in fieldnames:
-            if merger_row["IRRestartNew_PQ"] in ("F", "X") and \
-                    merger_row["IRRestartNew_CQ"] in ("Y", "N"):
-                if merger_row["IRRestartNew_PQ"] == "F":
-                    current_row["IRRestartNew"] = "Y"
-                else:
-                    current_row["IRRestartNew"] = "N"
-        return current_row
+        self.functions = [self.step_5]
 
     def step5_functions(self, merger_row, current_row, field):
         """
