@@ -308,14 +308,8 @@ def generate_ail():
                         '--avrf-file1',
                         help='avrf input filename for as400 and opas')
     parser.add_argument('-a2',
-                        '--avrf-file-alip1',
-                        help='avrf input filename for alip')
-    parser.add_argument('-a3',
-                        '--avrf-file-alip2',
-                        help='avrf input filename for alip')
-    parser.add_argument('-a4',
-                        '--avrf-file-alip3',
-                        help='avrf input filename for alip')
+                        '--avrf-file2',
+                        help='avrf input filename')
     parser.add_argument('-p', '--prev', help='previous quarter file')
     parser.add_argument('-v', '--valuation', help='date for file generation')
     parser.add_argument('-b', '--block', help='name of block')
@@ -341,33 +335,12 @@ def generate_ail():
             avrf_reader_dict[row['PolicyNumber']] = float(
                 row['IndexCredit'] if row['IndexCredit'] != '' else 0)
 
-    with open(args.avrf_file_alip1, 'r') as file:
-        reader = csv.DictReader(file, delimiter=',')
+    with open(args.avrf_file2, 'r') as file:
+        reader = csv.DictReader(file, delimiter='\t')
         for row in reader:
-            avrf_reader_dict[row['PolicyNumber']] = float(
-                row['IndexCredit'] if row['IndexCredit'] != '' else 0)
-
-    with open(args.avrf_file_alip2, 'r') as file:
-        reader = csv.DictReader(file, delimiter=',')
-        for row in reader:
-            if row['PolicyNumber'] in avrf_reader_dict:
-                avrf_reader_dict[row['PolicyNumber']] = float(avrf_reader_dict[row['PolicyNumber']] \
-                                                                  if avrf_reader_dict[row['PolicyNumber']] != '' else 0) \
-                                                        + float(row['IndexCredit'] if row['IndexCredit'] != '' else 0)
-            else:
-                avrf_reader_dict[row['PolicyNumber']] = float(
-                    row['IndexCredit'] if row['IndexCredit'] != '' else 0)
-
-    with open(args.avrf_file_alip3, 'r') as file:
-        reader = csv.DictReader(file, delimiter=',')
-        for row in reader:
-            if row['PolicyNumber'] in avrf_reader_dict:
-                avrf_reader_dict[row['PolicyNumber']] = float(avrf_reader_dict[row['PolicyNumber']] \
-                                                                  if avrf_reader_dict[row['PolicyNumber']] != '' else 0) \
-                                                        + float(row['IndexCredit'] if row['IndexCredit'] != '' else 0)
-            else:
-                avrf_reader_dict[row['PolicyNumber']] = float(row['IndexCredit'] if row['IndexCredit'] != '' else 0)
-
+            avrf_reader_dict[row['policy_number']] = float(
+                row['index_credit'] if row['index_credit'] != '' else 0)
+                
     header = tsv_io.read_header(args.merge_file)
     header.remove('PolNo_PQ')
     header.remove('PolNo_CQ')
