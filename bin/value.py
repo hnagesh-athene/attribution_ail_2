@@ -5,7 +5,7 @@ import sys
 
 import tqdm
 import xlrd
-from columns import Columns_ail
+from .columns import Columns_ail
 
 sys.path.insert(0, '../core_utils')
 from core_utils.dates import shift_date
@@ -177,7 +177,7 @@ class INTOutput():
         '''
         calculates maturity status of strategy
         '''
-        valdate = datetime.datetime.strptime(self.args.valuation, '%Y%m%d').date()
+        valdate = datetime.datetime.strptime(self.args.valuation_date, '%Y%m%d').date()
         if self.irecord['join_indicator'] == 'A':
             return 'N'
         elif self.irecord['Company'] == 'CU':
@@ -202,7 +202,7 @@ class INTOutput():
         '''
         calculates idxtermstart for amp ail
         '''
-        valdate = datetime.datetime.strptime(self.args.valuation, '%Y%m%d').date()
+        valdate = datetime.datetime.strptime(self.args.valuation_date, '%Y%m%d').date()
         if self.args.block == 'amp':
             for idx in range(1, 6):
                 if self.irecord['join_indicator'] == 'A':
@@ -243,9 +243,9 @@ class INTOutput():
 
     def days_ann(self):
         '''
-        days between maturity and valuation
+        days between maturity and valuation_date
         '''
-        valdate = datetime.datetime.strptime(self.args.valuation, '%Y%m%d').date()
+        valdate = datetime.datetime.strptime(self.args.valuation_date, '%Y%m%d').date()
         for i in range(1, 6):
             if self.irecord[f'_int_idx{i}_anniv'] == 'Y' and self.irecord['join_indicator'] in ('AB', 'B'):
                 issue_date_pq = datetime.datetime.strptime(self.irecord['IssueDate_PQ'], '%Y%m%d').date()
@@ -282,11 +282,12 @@ def execute_attribute(row, avrf_reader_dict, EOR_Assumptions_reader_dict,
 
 
 def ail_row_processor(avrf_reader_dict, EOR_Assumptions_reader_dict,
-                      field_names, args):
+                      field_names, args, conf):
     '''
     process each row
     '''
-    with open(args.merge_file, 'r') as file:
+    with open(conf['merge_file'].format(dir = conf['dir'],
+                            date = args.valuation_date, block = args.block), 'r') as file:
         reader1 = csv.DictReader(file, delimiter='\t')
         for row in reader1:
             res = execute_attribute(row, avrf_reader_dict,
@@ -295,27 +296,13 @@ def ail_row_processor(avrf_reader_dict, EOR_Assumptions_reader_dict,
             yield res
 
 
-def generate_ail():
+def generate_ail(args, conf):
     '''
     main function
     '''
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('-m', '--merge-file', help='merge filename')
-    parser.add_argument('-o', '--output', help='output filename')
-    parser.add_argument('-e', '--eor-file', help='eor input filename')
-    parser.add_argument('-a1',
-                        '--avrf-file1',
-                        help='avrf input filename for as400 and opas')
-    parser.add_argument('-a2',
-                        '--avrf-file2',
-                        help='avrf input filename')
-    parser.add_argument('-p', '--prev', help='previous quarter file')
-    parser.add_argument('-v', '--valuation', help='date for file generation')
-    parser.add_argument('-b', '--block', help='name of block')
-
-    args = parser.parse_args()
-    obj = xlrd.open_workbook(args.eor_file)
+    
+    obj = xlrd.open_workbook(conf['eor_file'].format(dir = conf['dir'],
+                                                     date = args.valuation_date, block = args.block))
 
     sheet = obj.sheet_by_index(1)
     EOR_Assumptions_reader_dict = dict()
@@ -329,25 +316,30 @@ def generate_ail():
 
     avrf_reader_dict = dict()
 
-    with open(args.avrf_file1, 'r') as file:
-        reader = csv.DictReader(file, delimiter='\t')
-        for row in reader:
-            avrf_reader_dict[row['PolicyNumber']] = float(
-                row['IndexCredit'] if row['IndexCredit'] != '' else 0)
-
-    with open(args.avrf_file2, 'r') as file:
-        reader = csv.DictReader(file, delimiter='\t')
-        for row in reader:
-            avrf_reader_dict[row['policy_number']] = float(
-                row['index_credit'] if row['index_credit'] != '' else 0)
+    avrf_files = conf['avrf_input'].split(',')
+    avrf_key = conf['avrf_key'].split(',')
+    
+    if args.block in ('amp', 'ila', 'anx', 'amp', 'tda'):
+        for file in range(len(avrf_files)):
+            file_path = avrf_files[file].format(dir = conf['dir'],
+                            date = args.valuation_date, block = args.block)
+            file_kv = avrf_key[file].split('|')
+            polno = file_kv[0].split(':')[1]
+            indexcredit = file_kv[1].split(':')[1]
+            with open(file_path, 'r') as f:
+                reader = csv.DictReader(f, delimiter='\t')
+                for row in reader:
+                    avrf_reader_dict[row[polno]] = float(
+                        row[indexcredit] if row[indexcredit] != '' else 0)
                 
-    header = tsv_io.read_header(args.merge_file)
+    header = tsv_io.read_header(conf['merge_file'].format(dir = conf['dir'],
+                                                          date = args.valuation_date, block = args.block))
     header.remove('PolNo_PQ')
     header.remove('PolNo_CQ')
     header.remove('Company_PQ')
     header.remove('Company_CQ')
 
-    field_names = tsv_io.read_header(args.prev)
+    field_names = tsv_io.read_header(conf['dir']+'/input/'+args.valuation_date+'/'+args.block+'/'+args.cur)
 
     if args.block == 'amp':
         field_list = Columns_ail + ['Idx1TermStart_PQ', 'Idx2TermStart_PQ', 'Idx3TermStart_PQ',
@@ -358,8 +350,9 @@ def generate_ail():
         field_list = Columns_ail
     rows = tqdm.tqdm(
         ail_row_processor(avrf_reader_dict, EOR_Assumptions_reader_dict,
-                          field_names, args))
-    with open(args.output, 'w', newline='') as file:
+                          field_names, args, conf))
+    with open(conf['intermediate_file'].format(dir = conf['dir'],
+                            date = args.valuation_date, block = args.block), 'w', newline='') as file:
         writer = csv.DictWriter(file,
                                 fieldnames=header + field_list,
                                 delimiter='\t',

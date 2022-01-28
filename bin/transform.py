@@ -27,15 +27,16 @@ class Transform:
     generate step 1- 10 atttribution_ails
     '''
 
-    def __init__(self, args):
+    def __init__(self, args, conf):
         '''
         initialize the class object
         '''
         self.args = args
         valdate = datetime.datetime.strptime(self.args.valuation_date, '%Y%m%d').date()
         self.previous = ''.join(str(shift_quarters(valdate, -1)).split('-'))
-        self.merger = args.merger_path
-        self.fieldnames = tsv_io.read_header(args.prev)
+        self.merger = conf['intermediate_file'].format(dir = conf['dir'],
+                                                       date = args.valuation_date, block = args.block)
+        self.fieldnames = tsv_io.read_header(conf['dir']+'/input/'+args.valuation_date+'/'+args.block+'/'+args.cur)
         self.output_path = 'data/output/' + args.valuation_date + '/' + args.block + '/' + r'ail.{}.{}_{}.ail2'
         self.steps = self.steps_profile()
         self.changes = self.change_steps()

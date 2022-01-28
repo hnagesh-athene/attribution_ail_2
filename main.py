@@ -5,8 +5,11 @@ import argparse
 import datetime
 import os
 import traceback
+import json
 
 from bin.transform import Transform
+from bin.merger import merge
+from bin.value import generate_ail
 from bin.log_utils import logger
 from core_utils.log import ConsoleLogOutput, FileLogOutput
 
@@ -30,17 +33,18 @@ def main():
                         help='date for which the AILs should be generated')
     parser.add_argument('-b', '--block',
                         help='name of the block')
-    parser.add_argument('-m', '--merger-path',
-                        help='path to the old input AILs')
-    parser.add_argument('-o', '--output',
-                        help='path to the output AILs',
-                        default='output/test.ail2')
     parser.add_argument('-p', '--prev',
                         help='previous quarter file')
+    parser.add_argument('-c', '--cur',
+                        help='previous quarter file')
+    
     args = parser.parse_args()
 
     if not os.path.exists('data/output/' + args.valuation_date + '/' + args.block):
         os.makedirs('data/output/' + args.valuation_date + '/' + args.block)
+    
+    if not os.path.exists('data/intermediate/' + args.valuation_date + '/' + args.block):
+        os.makedirs('data/intermediate/' + args.valuation_date + '/' + args.block)
     
     if not os.path.exists('logs/'+args.valuation_date+'/'+args.block):
         os.makedirs('logs/'+args.valuation_date+'/'+args.block)
@@ -49,8 +53,15 @@ def main():
     logger.add_output(console_output, 'info', 'error', 'critical')
     logger.add_output(failure_output, 'error', 'critical')
     
+    path = 'templates/attribution_ail.json'
+    with open(path) as file:
+            conf = json.load(file)
+            
     try:
-        Transform(args)
+        merge(args, conf[args.block][0])
+        print("Merging complete")
+        generate_ail(args, conf[args.block][0])
+        Transform(args, conf[args.block][0])
     except Exception as e:
         logger.error(traceback.format_exc())
 

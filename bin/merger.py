@@ -16,7 +16,6 @@ def reader(file_1, file_2):
     """
     reader
     """
-    print("reader")
     obj1 = tsv_io.read_file(file_1)
     obj2 = tsv_io.read_file(file_2)
     return obj1, obj2
@@ -26,7 +25,6 @@ def writer(filename, header):
     """
     writer
     """
-    print("output write")
     cols = prefix_list_pq(header) + prefix_list_cq(header)
     file = tsv_io.iterative_writer(filename, cols)
     return file
@@ -60,28 +58,24 @@ def prefix_list_cq(row):
     return [k + "_CQ" for k in row]
 
 
-def merge():
+def merge(args, conf):
     """
     Merging previous quarter and current quarter ail's
     """
-    print("transform")
+    print("Merging current and previous quarter ail")
+    prev = conf['dir']+'/input/'+args.valuation_date+'/'+args.block+'/'+args.prev
+    cur = conf['dir']+'/input/'+args.valuation_date+'/'+args.block+'/'+args.cur
+    output = conf['merge_file'].format(dir = conf['dir'],
+                                       date = args.valuation_date, block = args.block)
 
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("-p", "--prev", help="previous quarter file")
-    parser.add_argument("-c", "--cur", help="current quarter file")
-    parser.add_argument("-o", "--output", help="output filename")
-
-    args = parser.parse_args()
-
-    input_1, input_2 = reader(args.prev, args.cur)
+    input_1, input_2 = reader(prev, cur)
     progress = tqdm.tqdm(mininterval=1, unit=" rows", desc="rows checked ")
     previous_row = next(input_1)
     current_row = next(input_2)
 
-    header = tsv_io.read_header(args.prev)
+    header = tsv_io.read_header(prev)
 
-    write_obj = writer(args.output, header)
+    write_obj = writer(output, header)
     row = {fields: None for fields in header}
     row_pq = prefix_dict_pq(row)
     row_cq = prefix_dict_cq(row)
