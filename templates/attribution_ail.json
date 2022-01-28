@@ -1,7 +1,7 @@
 {
     "amp": [
         {
-			"dir":"C:/Users/E44595/eclipse-workspace/attribution_ail2/data",
+			"dir":"/actuarial_it/attribution_ail/data",
             "merge_file": "{dir}/intermediate/{date}/{block}/ail.{block}.merged.ail2",
 			"intermediate_file": "{dir}/intermediate/{date}/{block}/ail.{block}.intermediate.ail2",
 			"avrf_input": "{dir}/input/{date}/static/policy_report.txt,{dir}/input/{date}/static/policy_rollforward.txt",
@@ -10,7 +10,7 @@
         }],
 	"ila": [
         {
-			"dir":"C:/Users/E44595/eclipse-workspace/attribution_ail2/data",
+			"dir":"/actuarial_it/attribution_ail/data",
             "merge_file": "{dir}/intermediate/{date}/{block}/ail.{block}.merged.ail2",
 			"intermediate_file": "{dir}/intermediate/{date}/{block}/ail.{block}.intermediate.ail2",
 			"avrf_input": "{dir}/input/{date}/static/policy_report.txt,{dir}/input/{date}/static/policy_rollforward.txt",
@@ -20,7 +20,7 @@
     ],
 	"tda": [
         {
-			"dir":"C:/Users/E44595/eclipse-workspace/attribution_ail2/data",
+			"dir":"/actuarial_it/attribution_ail/data",
             "merge_file": "{dir}/intermediate/{date}/{block}/ail.{block}.merged.ail2",
 			"intermediate_file": "{dir}/intermediate/{date}/{block}/ail.{block}.intermediate.ail2",
 			"avrf_input": "{dir}/input/{date}/static/policy_report.txt,{dir}/input/{date}/static/policy_rollforward.txt",
@@ -30,7 +30,7 @@
     ],
 	"anx": [
         {
-			"dir":"C:/Users/E44595/eclipse-workspace/attribution_ail2/data",
+			"dir":"/actuarial_it/attribution_ail/data",
             "merge_file": "{dir}/intermediate/{date}/{block}/ail.{block}.merged.ail2",
 			"intermediate_file": "{dir}/intermediate/{date}/{block}/ail.{block}.intermediate.ail2",
 			"avrf_input": "{dir}/input/{date}/static/policy_report.txt,{dir}/input/{date}/static/policy_rollforward.txt",
@@ -40,7 +40,7 @@
     ],
 	"fia": [
         {
-			"dir":"C:/Users/E44595/eclipse-workspace/attribution_ail2/data",
+			"dir":"/actuarial_it/attribution_ail/data",
             "merge_file": "{dir}/intermediate/{date}/{block}/ail.{block}.merged.ail2",
 			"intermediate_file": "{dir}/intermediate/{date}/{block}/ail.{block}.intermediate.ail2",
 			"avrf_input": "{dir}/input/{date}/static/policy_report.txt,{dir}/input/{date}/static/policy_rollforward.txt",
