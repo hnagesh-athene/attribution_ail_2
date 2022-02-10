@@ -331,6 +331,18 @@ def generate_ail(args, conf):
                 for row in reader:
                     avrf_reader_dict[row[polno]] = float(
                         row[indexcredit] if row[indexcredit] != '' else 0)
+    elif args.block in ('voya_fia', 'voya_fa'):
+        for file in range(len(avrf_files)):
+            file_path = avrf_files[file].format(dir = conf['dir'],
+                            date = args.valuation_date, block = args.block)
+            file_kv = avrf_key[file].split('|')
+            polno = file_kv[0].split(':')[1]
+            indexcredit = file_kv[1].split(':')[1]
+            with open(file_path, 'r') as f:
+                reader = csv.DictReader(f, delimiter=',')
+                for row in reader:
+                    avrf_reader_dict[row[polno]] = float(
+                        row[indexcredit] if row[indexcredit] != '' else 0)
                 
     header = tsv_io.read_header(conf['merge_file'].format(dir = conf['dir'],
                                                           date = args.valuation_date, block = args.block))
