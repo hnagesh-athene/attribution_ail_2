@@ -49,10 +49,11 @@ def main():
     if not os.path.exists('logs/'+args.valuation_date+'/'+args.block):
         os.makedirs('logs/'+args.valuation_date+'/'+args.block)
     console_output = ConsoleLogOutput()
+    run_log = FileLogOutput('logs/'+args.valuation_date+'/'+args.block+'/'+'step.run.log')
     failure_output = FileLogOutput('logs/'+args.valuation_date+'/'+args.block+'/'+'step.error.log')
-    logger.add_output(console_output, 'info', 'error', 'critical')
+    logger.add_output(console_output, 'error', 'critical')
     logger.add_output(failure_output, 'error', 'critical')
-    
+    logger.add_output(run_log, 'info')
     path = 'templates/attribution_ail.json'
     with open(path) as file:
             conf = json.load(file)
@@ -60,7 +61,7 @@ def main():
     try:
         merge(args, conf[args.block][0])
         print("Merging complete")
-        generate_ail(args, conf[args.block][0])
+        generate_ail(args, conf[args.block][0], logger)
         Transform(args, conf[args.block][0])
     except Exception as e:
         logger.error(traceback.format_exc())
