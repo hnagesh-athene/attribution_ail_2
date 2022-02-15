@@ -6,7 +6,7 @@ import sys
 import tqdm
 import xlrd
 from .columns import Columns_ail
-
+import glob
 sys.path.insert(0, '../core_utils')
 from core_utils.dates import shift_date
 from core_utils.tabular import tsv_io
@@ -49,7 +49,7 @@ class INTOutput():
         for i in range(1,6):
             if self.args.block == "amp":
                 self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ']
-            elif self.args.block in ('voya_fia', 'voya_fa', 'Rocky.fia', 'Rocky.tda'):
+            elif self.args.block in ('voya_fia', 'voya_fa', 'Rocky.fia', 'Rocky.tda', 'jackson.fia', 'jackson.tda'):
                 self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ'] \
                           + self.irecord[f'Idx{i}CredStrategy_CQ']
             else:
@@ -66,7 +66,7 @@ class INTOutput():
         for i in range(1,6):
             if self.args.block == "amp":
                 self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ']
-            elif self.args.block in ('voya_fia', 'voya_fa', 'Rocky.fia', 'Rocky.tda'):
+            elif self.args.block in ('voya_fia', 'voya_fa', 'Rocky.fia', 'Rocky.tda', 'jackson.fia', 'jackson.tda'):
                 self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ'] \
                           + self.irecord[f'Idx{i}CredStrategy_PQ']
             else:
@@ -393,7 +393,23 @@ def generate_ail(args, conf, logger):
                     pass
                 temp = avrf_reader_dict.get(policy_number, 0)
                 avrf_reader_dict[policy_number] = temp + float(value)
-                
+    elif args.block in ['jackson.fia', 'jackson.tda']:
+        valdate = datetime.datetime.strptime(args.valuation_date, '%Y%m%d').date()
+        sec_month = valdate.replace(day = 1) - datetime.timedelta(days = 1)
+        first_month = sec_month.replace(day = 1) - datetime.timedelta(days = 1)
+        avrf_dates = [first_month.strftime('%Y%m%d'), sec_month.strftime('%Y%m%d'), valdate.strftime('%Y%m%d')]
+        for file in range(len(avrf_files)):
+            file_path = avrf_files[file].format(dir=conf['dir'], date=args.valuation_date, block=args.block, yyyy = avrf_dates[file][0:4], mm = avrf_dates[file][4:6], dd = avrf_dates[file][6:8])
+            file_kv = avrf_key[file].split('|')
+            polno = file_kv[0].split(':')[1]
+            indexcredit = file_kv[1].split(':')[1]
+            for name in glob.glob(file_path):
+                with open(name, 'r') as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        avrf_reader_dict[row[polno]] = avrf_reader_dict.get(row[polno], 0) + float(
+                        row[indexcredit] if row[indexcredit] != '' else 0)
+
     header = tsv_io.read_header(conf['merge_file'].format(dir = conf['dir'],
                                                           date = args.valuation_date, block = args.block))
     header.remove('PolNo_PQ')
