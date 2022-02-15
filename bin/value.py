@@ -49,7 +49,7 @@ class INTOutput():
         for i in range(1,6):
             if self.args.block == "amp":
                 self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ']
-            elif self.args.block in ('voya_fia', 'voya_fa'):
+            elif self.args.block in ('voya_fia', 'voya_fa', 'Rocky.fia', 'Rocky.tda'):
                 self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ'] \
                           + self.irecord[f'Idx{i}CredStrategy_CQ']
             else:
@@ -66,7 +66,7 @@ class INTOutput():
         for i in range(1,6):
             if self.args.block == "amp":
                 self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ']
-            elif self.args.block in ('voya_fia', 'voya_fa'):
+            elif self.args.block in ('voya_fia', 'voya_fa', 'Rocky.fia', 'Rocky.tda'):
                 self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ'] \
                           + self.irecord[f'Idx{i}CredStrategy_PQ']
             else:
@@ -376,6 +376,23 @@ def generate_ail(args, conf, logger):
                 for row in reader:
                     avrf_reader_dict[row[polno]] = float(
                         row[indexcredit] if row[indexcredit] != '' else 0)
+    elif args.block in ('Rocky.fia', 'Rocky.tda'):
+        for file in range(len(avrf_files)):
+            avrf_obj = xlrd.open_workbook(avrf_files[file].format(dir = conf['dir'],date = args.valuation_date,
+                                                                  block = args.block, year=args.valuation_date[:4],
+                                                                  month=args.valuation_date[4:6],
+                                                                  day = args.valuation_date[6:]))
+            sheet = avrf_obj.sheet_by_index(0)
+            for index in range(1, sheet.nrows):
+                policy_number = sheet.cell_value(index, 0)
+                value = sheet.cell_value(index, 15)
+                try:
+                    if '(' in value:
+                        value = value[1:-1]
+                except:
+                    pass
+                temp = avrf_reader_dict.get(policy_number, 0)
+                avrf_reader_dict[policy_number] = temp + float(value)
                 
     header = tsv_io.read_header(conf['merge_file'].format(dir = conf['dir'],
                                                           date = args.valuation_date, block = args.block))

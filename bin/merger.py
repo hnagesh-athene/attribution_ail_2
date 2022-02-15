@@ -65,8 +65,7 @@ def merge(args, conf):
     print("Merging current and previous quarter ail")
     prev = conf['dir']+'/input/'+args.valuation_date+'/'+args.block+'/'+args.prev
     cur = conf['dir']+'/input/'+args.valuation_date+'/'+args.block+'/'+args.cur
-    output = conf['merge_file'].format(dir = conf['dir'],
-                                       date = args.valuation_date, block = args.block)
+    output = conf['merge_file'].format(dir = conf['dir'], date = args.valuation_date, block = args.block)
 
     input_1, input_2 = reader(prev, cur)
     progress = tqdm.tqdm(mininterval=1, unit=" rows", desc="rows checked ")

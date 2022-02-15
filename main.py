@@ -36,7 +36,7 @@ def main():
     parser.add_argument('-p', '--prev',
                         help='previous quarter file')
     parser.add_argument('-c', '--cur',
-                        help='previous quarter file')
+                        help='current quarter file')
     
     args = parser.parse_args()
 

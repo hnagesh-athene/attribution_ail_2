@@ -32,8 +32,8 @@ class Step8:
         """
         IdxAOptNomMV logic
         """
-        if "Idx1AOptNomMV" in fieldnames:
-            for index in range(1, 6):
+        for index in range(1, 6):
+            if f"Idx{index}AOptNomMV" in fieldnames:
                 key = merger_row[f"_int_idx{index}_RecLinkID_CQ"]
                 if key != "_" and merger_row["join_indicator"] == "AB":
                     idx = eval(merger_row["__idxordersync_pq"]).get(key, index)

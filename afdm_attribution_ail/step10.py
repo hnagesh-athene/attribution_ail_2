@@ -51,8 +51,8 @@ class Step10:
         '''
         logic for the field
         '''
-        if 'Idx1BudgetStrategyFee' in fieldnames:
-            for index in range(1, 6):
+        for index in range(1, 6):
+            if f'Idx{index}BudgetStrategyFee' in fieldnames:
                 key = merger_row[f"_int_idx{index}_RecLinkID_CQ"]
                 if key != '_' and merger_row['join_indicator'] == 'AB':
                     idx = eval(merger_row['__idxordersync_pq']).get(key, index)
@@ -60,10 +60,16 @@ class Step10:
                     idx = index
                 if merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' \
                         and merger_row[f'_int_idx{idx}_anniv'] == 'N':
-                    current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{idx}BudgetStrategyFee_PQ']
+                    try:
+                        current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{idx}BudgetStrategyFee_PQ']
+                    except:
+                        current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{index}BudgetStrategyFee_PQ']
                 elif merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' \
                         and merger_row[f'_int_idx{idx}_anniv'] == 'Y':
-                    current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{idx}BudgetStrategyFee_PQ']
+                    try:
+                        current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{idx}BudgetStrategyFee_PQ']
+                    except:
+                        current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{index}BudgetStrategyFee_PQ']
                 else:
                     current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{index}BudgetStrategyFee_CQ']
         return current_row

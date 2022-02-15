@@ -67,5 +67,25 @@
 			"avrf_key":"key:PolicyNumber|value:IndexCredit",
 			"eor_file":"{dir}/input/{date}/static/EOR_Assumptions_temp.xlsx"
         }
+	],
+	"Rocky.fia": [
+		{
+			"dir":"/actuarial_it/attribution_ail/data",
+			"merge_file": "{dir}/intermediate/{date}/{block}/ail.{block}.merged.ail2",
+			"intermediate_file": "{dir}/intermediate/{date}/{block}/ail.{block}.intermediate.ail2",
+			"avrf_input": "{dir}/input/{date}/static/LNL12_AVRF {year}.{month}.{day}_reformated.xlsx",
+			"avrf_key":"key:Policy|value:Apprec",
+			"eor_file":"{dir}/input/{date}/static/EOR_Assumptions_temp.xlsx"
+		}
+	],
+	"Rocky.tda": [
+		{
+			"dir":"/actuarial_it/attribution_ail/data",
+			"merge_file": "{dir}/intermediate/{date}/{block}/ail.{block}.merged.ail2",
+			"intermediate_file": "{dir}/intermediate/{date}/{block}/ail.{block}.intermediate.ail2",
+			"avrf_input": "{dir}/input/{date}/static/LNL12_AVRF {year}.{month}.{day}_reformated.xlsx",
+			"avrf_key":"key:Policy|value:Apprec",
+			"eor_file":"{dir}/input/{date}/static/EOR_Assumptions_temp.xlsx"
+		}
 	]
 }
