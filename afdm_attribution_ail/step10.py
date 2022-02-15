@@ -51,23 +51,25 @@ class Step10:
         '''
         logic for the field
         '''
-        if 'Idx1BudgetStrategyFee' in fieldnames:
-            for index in range(1, 6):
-                if args.block == 'amp':
-                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ']
-                else:
-                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ'] \
-                          + merger_row[f'Idx{index}ANXStrat_CQ']
-                if key != '__' and merger_row['join_indicator'] == 'AB':
+        for index in range(1, 6):
+            if f'Idx{index}BudgetStrategyFee' in fieldnames:
+                key = merger_row[f"_int_idx{index}_RecLinkID_CQ"]
+                if key != '_' and merger_row['join_indicator'] == 'AB':
                     idx = eval(merger_row['__idxordersync_pq']).get(key, index)
                 else:
                     idx = index
-                if merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_' \
+                if merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' \
                         and merger_row[f'_int_idx{idx}_anniv'] == 'N':
-                    current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{idx}BudgetStrategyFee_PQ']
-                elif merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_' \
+                    try:
+                        current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{idx}BudgetStrategyFee_PQ']
+                    except:
+                        current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{index}BudgetStrategyFee_PQ']
+                elif merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' \
                         and merger_row[f'_int_idx{idx}_anniv'] == 'Y':
-                    current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{idx}BudgetStrategyFee_PQ']
+                    try:
+                        current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{idx}BudgetStrategyFee_PQ']
+                    except:
+                        current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{index}BudgetStrategyFee_PQ']
                 else:
                     current_row[f'Idx{index}BudgetStrategyFee'] = merger_row[f'Idx{index}BudgetStrategyFee_CQ']
         return current_row
@@ -78,19 +80,15 @@ class Step10:
         '''
         if 'Idx1BudgetVolAdjOB' in fieldnames:
             for index in range(1, 6):
-                if args.block == 'amp':
-                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ']
-                else:
-                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ'] \
-                          + merger_row[f'Idx{index}ANXStrat_CQ']
-                if key != '__' and merger_row['join_indicator'] == 'AB':
+                key = merger_row[f"_int_idx{index}_RecLinkID_CQ"]
+                if key != '_' and merger_row['join_indicator'] == 'AB':
                     idx = eval(merger_row['__idxordersync_pq']).get(key, index)
                 else:
                     idx = index
-                if merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_' \
+                if merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' \
                         and merger_row[f'_int_idx{idx}_anniv'] == 'N':
                     current_row[f'Idx{index}BudgetVolAdjOB'] = merger_row[f'Idx{idx}BudgetVolAdjOB_PQ']
-                elif merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_' \
+                elif merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' \
                         and merger_row[f'_int_idx{idx}_anniv'] == 'Y':
                     current_row[f'Idx{index}BudgetVolAdjOB'] = merger_row[f'Idx{idx}BudgetOBCurr_PQ']
                 else:
@@ -103,19 +101,15 @@ class Step10:
         '''
         if 'Idx1BudgetOBCurr' in fieldnames:
             for index in range(1, 6):
-                if args.block == 'amp':
-                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ']
-                else:
-                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ'] \
-                          + merger_row[f'Idx{index}ANXStrat_CQ']
-                if key != '__' and merger_row['join_indicator'] == 'AB':
+                key = merger_row[f"_int_idx{index}_RecLinkID_CQ"]
+                if key != '_' and merger_row['join_indicator'] == 'AB':
                     idx = eval(merger_row['__idxordersync_pq']).get(key, index)
                 else:
                     idx = index
-                if merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_' \
+                if merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' \
                         and merger_row[f'_int_idx{idx}_anniv'] == 'N':
                     current_row[f'Idx{index}BudgetOBCurr'] = merger_row[f'Idx{idx}BudgetOBCurr_PQ']
-                elif merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_' \
+                elif merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' \
                         and merger_row[f'_int_idx{idx}_anniv'] == 'Y':
                     current_row[f'Idx{index}BudgetOBCurr'] = merger_row[f'Idx{idx}BudgetOBCurr_PQ']
                 else:
@@ -128,19 +122,15 @@ class Step10:
         '''
         if 'Idx1BudgetUltOB' in fieldnames:
             for index in range(1, 6):
-                if args.block == 'amp':
-                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ']
-                else:
-                    key = merger_row[f'Idx{index}Index_CQ'] + merger_row[f'Idx{index}RecLinkID_CQ'] \
-                          + merger_row[f'Idx{index}ANXStrat_CQ']
-                if key != '__' and merger_row['join_indicator'] == 'AB':
+                key = merger_row[f"_int_idx{index}_RecLinkID_CQ"]
+                if key != '_' and merger_row['join_indicator'] == 'AB':
                     idx = eval(merger_row['__idxordersync_pq']).get(key, index)
                 else:
                     idx = index
-                if merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_' \
+                if merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' \
                         and merger_row[f'_int_idx{idx}_anniv'] == 'N':
                     current_row[f'Idx{index}BudgetUltOB'] = merger_row[f'Idx{idx}BudgetUltOB_PQ']
-                elif merger_row['join_indicator'] == 'AB' and merger_row[f'Idx{index}RecLinkID_CQ'] != '_' \
+                elif merger_row['join_indicator'] == 'AB' and merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' \
                         and merger_row[f'_int_idx{idx}_anniv'] == 'Y':
                     current_row[f'Idx{index}BudgetUltOB'] = merger_row[f'Idx{idx}BudgetUltOB_PQ']
                 else:

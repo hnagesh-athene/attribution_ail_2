@@ -6,7 +6,7 @@ import sys
 import tqdm
 import xlrd
 from .columns import Columns_ail
-
+import glob
 sys.path.insert(0, '../core_utils')
 from core_utils.dates import shift_date
 from core_utils.tabular import tsv_io
@@ -14,7 +14,7 @@ from core_utils.tabular import tsv_io
 
 class INTOutput():
     def __init__(self, irecord, avrf_reader_dict, EOR_Assumptions_reader_dict,
-                 field_names, args):
+                 field_names, args, logger):
         """
         In this method,
         Initialization of required instance variables is done,
@@ -40,6 +40,44 @@ class INTOutput():
             'AIL': 'AAI',
             'FBL': 'AFB'
         }
+        self.logger = logger
+        self.check = ''
+        
+    
+    def rec_linkid_cq(self):
+        
+        for i in range(1,6):
+            if self.args.block == "amp":
+                self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ']
+            elif self.args.block in ('voya_fia', 'voya_fa', 'Rocky.fia', 'Rocky.tda', 'jackson.fia', 'jackson.tda'):
+                self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ'] \
+                          + self.irecord[f'Idx{i}CredStrategy_CQ']
+            else:
+                self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ'] \
+                          + self.irecord[f"Idx{i}ANXStrat_CQ"]
+                          
+            if self.irecord[f'_int_idx{i}_RecLinkID_CQ'] in ('___', '__'):
+                self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = '_'
+            
+        return self
+
+    def rec_linkid_pq(self):
+        
+        for i in range(1,6):
+            if self.args.block == "amp":
+                self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ']
+            elif self.args.block in ('voya_fia', 'voya_fa', 'Rocky.fia', 'Rocky.tda', 'jackson.fia', 'jackson.tda'):
+                self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ'] \
+                          + self.irecord[f'Idx{i}CredStrategy_PQ']
+            else:
+                self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ'] \
+                          + self.irecord[f"Idx{i}ANXStrat_PQ"]
+                          
+            if self.irecord[f'_int_idx{i}_RecLinkID_PQ'] in ('___', '__'):
+                self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = '_'
+                
+        return self
+
 
     def policy_number(self):
         '''
@@ -79,11 +117,9 @@ class INTOutput():
         idx = {}
         if self.irecord['join_indicator'] in ('AB', 'B'):
             for i in range(1, 6):
-                if self.args.block == 'amp':
-                    key = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ']
-                else:
-                    key = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ'] + \
-                          self.irecord[f'Idx{i}ANXStrat_PQ']
+                key = self.irecord[f'_int_idx{i}_RecLinkID_PQ']
+                if key != '_' and key in idx:
+                    self.check = key
                 idx[key] = i
             self.irecord['__idxordersync_pq'] = idx
 
@@ -96,13 +132,14 @@ class INTOutput():
         idx = {}
         if self.irecord['join_indicator'] in ('AB', 'A'):
             for i in range(1, 6):
-                if self.args.block == 'amp':
-                    key = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ']
-                else:
-                    key = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ'] + \
-                          self.irecord[f'Idx{i}ANXStrat_CQ']
+                key = self.irecord[f'_int_idx{i}_RecLinkID_CQ']
+                if key != '_' and key in idx:
+                    self.check = key
                 idx[key] = i
             self.irecord['__idxordersync_cq'] = idx
+        
+        if self.check:
+            self.logger.info('PolNo : '+self.irecord['PolNo'] + ' key : '+self.check)
 
         return self
 
@@ -222,18 +259,12 @@ class INTOutput():
                     else:
                         self.irecord[f'Idx{idx}TermStart_PQ'] = int(self.irecord[f'Idx{idx}Term_PQ']) * 12 + 1 + term
                 if self.irecord['join_indicator'] == 'AB':
-                    if self.args.block == 'amp':
-                        key = self.irecord[f'Idx{idx}Index_CQ'] + self.irecord[f'Idx{idx}RecLinkID_CQ']
-                    else:
-                        key = self.irecord[f'Idx{idx}Index_CQ'] + self.irecord[f'Idx{idx}RecLinkID_CQ'] + \
-                              self.irecord[f'Idx{idx}ANXStrat_CQ']
-
                     issue_date_pq = datetime.datetime.strptime(
                         self.irecord['IssueDate_PQ'], '%Y%m%d').date()
                     term = 0
                     if 31 >= issue_date_pq.day > 22:
                         term = 1
-                    index = self.irecord['__idxordersync_pq'].get(key, idx)
+                    index = self.irecord['__idxordersync_pq'].get(self.irecord[f'_int_idx{idx}_RecLinkID_CQ'], idx)
                     maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{index}Term_PQ']) * 12, 0)
                     if maturity_date > shift_date(valdate, 0, -3, 0):
                         self.irecord[f'Idx{idx}TermStart_CQ'] = 1 + term
@@ -258,7 +289,7 @@ class INTOutput():
 
 
 def execute_attribute(row, avrf_reader_dict, EOR_Assumptions_reader_dict,
-                      field_names, args):
+                      field_names, args, logger):
     '''
     In this method,
     Transformation class object is created,
@@ -266,9 +297,11 @@ def execute_attribute(row, avrf_reader_dict, EOR_Assumptions_reader_dict,
     transformation methods are called.
     '''
     afdm = INTOutput(row, avrf_reader_dict, EOR_Assumptions_reader_dict,
-                     field_names, args)
+                     field_names, args, logger)
     afdm.policy_number() \
         .company() \
+        .rec_linkid_cq() \
+        .rec_linkid_pq()\
         .joint_indicator() \
         .idxordersync_pq() \
         .idxordersync_cq() \
@@ -282,7 +315,7 @@ def execute_attribute(row, avrf_reader_dict, EOR_Assumptions_reader_dict,
 
 
 def ail_row_processor(avrf_reader_dict, EOR_Assumptions_reader_dict,
-                      field_names, args, conf):
+                      field_names, args, conf, logger):
     '''
     process each row
     '''
@@ -292,11 +325,11 @@ def ail_row_processor(avrf_reader_dict, EOR_Assumptions_reader_dict,
         for row in reader1:
             res = execute_attribute(row, avrf_reader_dict,
                                     EOR_Assumptions_reader_dict, field_names,
-                                    args)
+                                    args, logger)
             yield res
 
 
-def generate_ail(args, conf):
+def generate_ail(args, conf, logger):
     '''
     main function
     '''
@@ -331,7 +364,52 @@ def generate_ail(args, conf):
                 for row in reader:
                     avrf_reader_dict[row[polno]] = float(
                         row[indexcredit] if row[indexcredit] != '' else 0)
-                
+    elif args.block in ('voya_fia', 'voya_fa'):
+        for file in range(len(avrf_files)):
+            file_path = avrf_files[file].format(dir = conf['dir'],
+                            date = args.valuation_date, block = args.block)
+            file_kv = avrf_key[file].split('|')
+            polno = file_kv[0].split(':')[1]
+            indexcredit = file_kv[1].split(':')[1]
+            with open(file_path, 'r') as f:
+                reader = csv.DictReader(f, delimiter=',')
+                for row in reader:
+                    avrf_reader_dict[row[polno]] = float(
+                        row[indexcredit] if row[indexcredit] != '' else 0)
+    elif args.block in ('Rocky.fia', 'Rocky.tda'):
+        for file in range(len(avrf_files)):
+            avrf_obj = xlrd.open_workbook(avrf_files[file].format(dir = conf['dir'],date = args.valuation_date,
+                                                                  block = args.block, year=args.valuation_date[:4],
+                                                                  month=args.valuation_date[4:6],
+                                                                  day = args.valuation_date[6:]))
+            sheet = avrf_obj.sheet_by_index(0)
+            for index in range(1, sheet.nrows):
+                policy_number = sheet.cell_value(index, 0)
+                value = sheet.cell_value(index, 15)
+                try:
+                    if '(' in value:
+                        value = value[1:-1]
+                except:
+                    pass
+                temp = avrf_reader_dict.get(policy_number, 0)
+                avrf_reader_dict[policy_number] = temp + float(value)
+    elif args.block in ['jackson.fia', 'jackson.tda']:
+        valdate = datetime.datetime.strptime(args.valuation_date, '%Y%m%d').date()
+        sec_month = valdate.replace(day = 1) - datetime.timedelta(days = 1)
+        first_month = sec_month.replace(day = 1) - datetime.timedelta(days = 1)
+        avrf_dates = [first_month.strftime('%Y%m%d'), sec_month.strftime('%Y%m%d'), valdate.strftime('%Y%m%d')]
+        for file in range(len(avrf_files)):
+            file_path = avrf_files[file].format(dir=conf['dir'], date=args.valuation_date, block=args.block, yyyy = avrf_dates[file][0:4], mm = avrf_dates[file][4:6], dd = avrf_dates[file][6:8])
+            file_kv = avrf_key[file].split('|')
+            polno = file_kv[0].split(':')[1]
+            indexcredit = file_kv[1].split(':')[1]
+            for name in glob.glob(file_path):
+                with open(name, 'r') as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        avrf_reader_dict[row[polno]] = avrf_reader_dict.get(row[polno], 0) + float(
+                        row[indexcredit] if row[indexcredit] != '' else 0)
+
     header = tsv_io.read_header(conf['merge_file'].format(dir = conf['dir'],
                                                           date = args.valuation_date, block = args.block))
     header.remove('PolNo_PQ')
@@ -350,7 +428,7 @@ def generate_ail(args, conf):
         field_list = Columns_ail
     rows = tqdm.tqdm(
         ail_row_processor(avrf_reader_dict, EOR_Assumptions_reader_dict,
-                          field_names, args, conf))
+                          field_names, args, conf, logger))
     with open(conf['intermediate_file'].format(dir = conf['dir'],
                             date = args.valuation_date, block = args.block), 'w', newline='') as file:
         writer = csv.DictWriter(file,
