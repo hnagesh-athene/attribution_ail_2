@@ -12,7 +12,8 @@ class Step8:
         """
         define fields to be modified in step 8
         """
-        self.functions = [self.idxAOptNomMV_formater]
+        self.functions = [self.generate,
+                          self.idxAOptNomMV_formater]
 
     def idxAOptNomMV(self, merger_row, current_row, index, idx):
         """
@@ -25,7 +26,7 @@ class Step8:
             if merger_row[f"_int_idx{index}_RecLinkID_CQ"] != '_' and merger_row[f"_int_idx{idx}_anniv"] == "N":
                 current_row[f"Idx{index}AOptNomMV"] = merger_row[f"Idx{idx}AOptNomMV_PQ"]
             if merger_row[f"_int_idx{index}_RecLinkID_CQ"] != '_' and merger_row[f"_int_idx{idx}_anniv"] == "Y":
-                current_row[f"Idx{index}AOptNomMV"] = merger_row[f"Idx{idx}BudgetVolAdjOB_PQ"]
+                current_row[f"Idx{index}AOptNomMV"] = merger_row[f"Idx{index}IncepCost_CQ"]
         return current_row
 
     def idxAOptNomMV_formater(self, merger_row, current_row, fieldnames, args):
@@ -41,4 +42,15 @@ class Step8:
                     idx = index
                 current_row = self.idxAOptNomMV(merger_row, current_row, index, idx)
 
+        return current_row
+    
+    def generate(self, merger_row, current_row, fieldnames, args):
+        """
+        Default fields
+        """
+        for fields in fieldnames:
+            if fields in ("PolNo", "Company"):
+                current_row[fields] = merger_row[fields]
+            else:
+                current_row[fields] = merger_row[fields + "_CQ"]
         return current_row
