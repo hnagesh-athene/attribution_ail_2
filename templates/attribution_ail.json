@@ -93,7 +93,7 @@
 			"dir": "/actuarial_it/attribution_ail/data",
             "merge_file": "{dir}/intermediate/{date}/{block}/ail.{block}.merged.ail2",
 			"intermediate_file": "{dir}/intermediate/{date}/{block}/ail.{block}.intermediate.ail2",
-			"avrf_input": "{dir}/input/{date}/static/JAC04a_Monthly Cedant Report_AVRF_FIA {yyyy}.{mm}.{dd}?.csv,{dir}/input/{date}/static/JAC04a_Monthly Cedant Report_AVRF_FIA {yyyy}.{mm}.{dd}?.csv, {dir}/input/{date}/static/JAC04a_Monthly Cedant Report_AVRF_FIA {yyyy}.{mm}.{dd}?.csv",
+			"avrf_input": "{dir}/input/{date}/static/JAC04a_Monthly Cedant Report_AVRF_FIA {yyyy}.{mm}.{dd}.csv,{dir}/input/{date}/static/JAC04a_Monthly Cedant Report_AVRF_FIA {yyyy}.{mm}.{dd}.csv, {dir}/input/{date}/static/JAC04a_Monthly Cedant Report_AVRF_FIA {yyyy}.{mm}.{dd}.csv",
 			"avrf_key":"key:PolicyNumber|value:IndexCredit, key:PolicyNumber|value:IndexCredit, key:PolicyNumber|value:IndexCredit",
 			"eor_file":"{dir}/input/{date}/static/EOR_Assumptions_temp.xlsx"
         }
@@ -103,7 +103,7 @@
 			"dir":"/actuarial_it/attribution_ail/data",
             "merge_file": "{dir}/intermediate/{date}/{block}/ail.{block}.merged.ail2",
 			"intermediate_file": "{dir}/intermediate/{date}/{block}/ail.{block}.intermediate.ail2",
-			"avrf_input": "{dir}/input/{date}/static/JAC04d_Monthly Cedant Report_AVRF_FA {yyyy}.{mm}.{dd}?.csv ,{dir}/input/{date}/static/JAC04d_Monthly Cedant Report_AVRF_FA {yyyy}.{mm}.{dd}?.csv, {dir}/input/{date}/static/JAC04d_Monthly Cedant Report_AVRF_FA {yyyy}.{mm}.{dd}?.csv",
+			"avrf_input": "{dir}/input/{date}/static/JAC04d_Monthly Cedant Report_AVRF_FA {yyyy}.{mm}.{dd}.csv ,{dir}/input/{date}/static/JAC04d_Monthly Cedant Report_AVRF_FA {yyyy}.{mm}.{dd}.csv, {dir}/input/{date}/static/JAC04d_Monthly Cedant Report_AVRF_FA {yyyy}.{mm}.{dd}.csv",
 			"avrf_key":"key:polnum|value:intcred, key:polnum|value:intcred, key:polnum|value:intcred",
 			"eor_file":"{dir}/input/{date}/static/EOR_Assumptions_temp.xlsx"
         }
