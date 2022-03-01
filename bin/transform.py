@@ -50,7 +50,7 @@ class Transform:
         define the steps for different blocks
         '''
         print('steps_profile')
-        if self.args.block in ('fia', 'voya_fia', 'Rocky.fia', 'jackson.fia'):
+        if self.args.block in ('fia', 'voya_fia', 'Rocky.fia', 'jackson.fia', 'lsw'):
             return [self.step_1, self.step_2, self.step_10, self.step_9, self.step_8,
                     self.step_7, self.step_6, self.step_5, self.step_3]
         elif self.args.block == 'anx':
