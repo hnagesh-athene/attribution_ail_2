@@ -60,11 +60,8 @@ class Transform:
             return [self.step_1, self.step_2, self.step_9, self.step_8,
                     self.step_8, self.step_8, self.step_8, self.step_8]
         elif self.args.block in ('tda', 'voya_fa', 'Rocky.tda', 'jackson.tda'):
-            return [self.step_1, self.step_2, self.OB, self.OB, self.OB, self.step_7,
+            return [self.step_1, self.step_2, self.OB, self.OB, self.step_7,
                     self.step_6, self.step_6, self.step_3]
-        elif self.args.block == 'ila':
-            return [self.step_1, self.step_2, self.OB, self.OB, self.OB, self.OB,
-                    self.OB, self.OB, self.OB]
 
     def change_steps(self):
         '''
@@ -79,9 +76,14 @@ class Transform:
         read transform and create output files
         '''
         print('generate')
-        return [self.writer('Step1'), self.writer('Step2'), self.writer('Step9'), 
-                self.writer('Step8'), self.writer('Step7'), self.writer('Step6'),
-                self.writer('Step5'), self.writer('Step3')]
+        if self.args.block in ('tda', 'voya_fa'):
+            return [self.writer('Step1'), self.writer('Step2'), self.writer('Step7'),
+                    self.writer('Step7'), self.writer('Step7'), self.writer('Step6'),
+                    self.writer('Step5'), self.writer('Step3')]
+        else:
+            return [self.writer('Step1'), self.writer('Step2'), self.writer('Step9'), 
+                    self.writer('Step8'), self.writer('Step7'), self.writer('Step6'),
+                    self.writer('Step5'), self.writer('Step3')]
 
     def transformer(self, input_1, steps):
         '''
@@ -242,7 +244,6 @@ class Transform:
                 for change in self.changes[8].functions:
                     current_row = self.row
                     current_row = change(merger_row, current_row, self.fieldnames)
-                self.writers[idx].send(current_row)
         return current_row
 
     def write_all(self, previous_row):
