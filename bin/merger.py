@@ -97,7 +97,7 @@ def merge(args, conf):
                     current_row = next(input_2)
                 except:
                     current_row = None
-            elif current_row["PolNo"] + current_row["Company"] < previous_row["PolNo"] + previous_row["Company"]:
+            elif current_row["PolNo"].ljust(25,'*' ) + current_row["Company"] < previous_row["PolNo"].ljust(25,'*' ) + previous_row["Company"]:
                 row = row_pq
                 row.update(prefix_dict_cq(current_row))
                 write_obj.send(row)
@@ -106,7 +106,7 @@ def merge(args, conf):
                 except:
                     current_row = None
 
-            elif current_row["PolNo"] + current_row["Company"] > previous_row["PolNo"] + previous_row["Company"]:
+            elif current_row["PolNo"].ljust(25,'*' ) + current_row["Company"] > previous_row["PolNo"].ljust(25,'*' ) + previous_row["Company"]:
                 row = prefix_dict_pq(previous_row)
                 row.update(row_cq)
                 write_obj.send(row)
