@@ -51,19 +51,19 @@ class Transform:
         '''
         print('steps_profile')
         if self.args.block in ('fia', 'voya_fia', 'Rocky.fia', 'jackson.fia', 'lsw'):
-            return [self.step_1, self.step_2, self.step_10, self.step_9, self.step_8,
+            return [self.step_1, self.step_2, self.step_9, self.step_8,
                     self.step_7, self.step_6, self.step_5, self.step_3]
         elif self.args.block == 'anx':
-            return [self.step_1, self.step_2, self.step_10, self.step_9, self.step_8,
+            return [self.step_1, self.step_2, self.step_9, self.step_8,
                     self.step_7, self.step_6, self.step_5, self.step_3]
         elif self.args.block == 'amp':
-            return [self.step_1, self.step_2, self.step_10, self.step_9, self.step_8,
+            return [self.step_1, self.step_2, self.step_9, self.step_8,
                     self.step_8, self.step_8, self.step_8, self.step_8]
         elif self.args.block in ('tda', 'voya_fa', 'Rocky.tda', 'jackson.tda'):
-            return [self.step_1, self.step_2, self.OB, self.OB, self.OB, self.step_7,
+            return [self.step_1, self.step_2, self.OB, self.OB, self.step_7,
                     self.step_6, self.step_6, self.step_3]
         elif self.args.block == 'ila':
-            return [self.step_1, self.step_2, self.OB, self.OB, self.OB, self.OB,
+            return [self.step_1, self.step_2, self.OB, self.OB, self.OB,
                     self.OB, self.OB, self.OB]
 
     def change_steps(self):
@@ -71,7 +71,7 @@ class Transform:
         get the field names and functions for the respective steps
         '''
         print('steps_change')
-        return [Step1(), Step2(), Step10(), Step9(), Step8(),
+        return [Step1(), Step2(), Step9(), Step8(),
                 Step7(), Step6(), Step5(), Step3(), OB()]
 
     def generate(self):
@@ -79,9 +79,9 @@ class Transform:
         read transform and create output files
         '''
         print('generate')
-        return [self.writer('Step1'), self.writer('Step2'), self.writer('Step10'),
-                self.writer('Step9'), self.writer('Step8'), self.writer('Step7'),
-                self.writer('Step6'), self.writer('Step5'), self.writer('Step3')]
+        return [self.writer('Step1'), self.writer('Step2'), self.writer('Step9'), 
+                self.writer('Step8'), self.writer('Step7'), self.writer('Step6'),
+                self.writer('Step5'), self.writer('Step3')]
 
     def transformer(self, input_1, steps):
         '''
@@ -93,13 +93,8 @@ class Transform:
         previous_row = None
         while merger_row:
             try:
-                for idx, func in enumerate(steps):
-                    if idx != 4:
-                        previous_row = func(merger_row, idx, previous_row)
-                    if idx == 2:
-                        temp = previous_row
-                    if idx == 4:
-                        previous_row = func(merger_row, idx, temp)
+                for idx, func in enumerate(steps):      
+                        previous_row = func(merger_row, idx, previous_row)           
                 merger_row = next(input_1)
             except StopIteration:
                 break
@@ -156,7 +151,7 @@ class Transform:
         '''
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
-                for change in self.changes[8].functions:
+                for change in self.changes[7].functions:
                     current_row = change(merger_row, current_row, self.fieldnames)
                 self.writers[idx].send(current_row)
         return current_row
@@ -177,7 +172,7 @@ class Transform:
         '''
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
-                for change in self.changes[7].functions:
+                for change in self.changes[6].functions:
                     current_row = change(merger_row, current_row, self.fieldnames)
                 self.writers[idx].send(current_row)
         return current_row
@@ -188,7 +183,7 @@ class Transform:
         '''
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
-                for change in self.changes[6].functions:
+                for change in self.changes[5].functions:
                     current_row = change(merger_row, current_row, self.fieldnames)
                 self.writers[idx].send(current_row)
         return current_row
@@ -199,7 +194,7 @@ class Transform:
         '''
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
-                for change in self.changes[5].functions:
+                for change in self.changes[4].functions:
                     current_row = change(merger_row, current_row, self.fieldnames)
                 self.writers[idx].send(current_row)
         return current_row
@@ -210,7 +205,7 @@ class Transform:
         '''
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
-                for change in self.changes[4].functions:
+                for change in self.changes[3].functions:
                     current_row = change(merger_row, current_row, self.fieldnames, self.args)
                 self.writers[idx].send(current_row)
         return current_row
@@ -221,7 +216,7 @@ class Transform:
         '''
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
-                for change in self.changes[3].functions:
+                for change in self.changes[2].functions:
                     current_row = change(merger_row, current_row, self.fieldnames, self.args)
                 self.writers[idx].send(current_row)
         return current_row
@@ -244,7 +239,7 @@ class Transform:
         '''
         if merger_row:
             if merger_row['join_indicator'] in ('AB', 'A'):
-                for change in self.changes[9].functions:
+                for change in self.changes[8].functions:
                     current_row = self.row
                     current_row = change(merger_row, current_row, self.fieldnames)
                 self.writers[idx].send(current_row)

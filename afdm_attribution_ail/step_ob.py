@@ -9,10 +9,7 @@ class OB:
         """
         print("other blocks")
         self.functions = [
-            self.GenBudgetOBCurr,
-            self.GenBudgetUltOB,
             self.generate,
-            self.fixed,
         ]
 
     def GenBudgetOBCurr(self, merger_row, current_row, fieldnames):
@@ -60,6 +57,6 @@ class OB:
         for fields in fieldnames:
             if fields in ("PolNo", "Company"):
                 current_row[fields] = merge[fields]
-            elif fields not in ("GenBudgetOBCurr", "GenBudgetUltOB"):
+            else:
                 current_row[fields] = merge[fields + "_CQ"]
         return current_row
