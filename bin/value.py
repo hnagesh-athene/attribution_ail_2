@@ -42,10 +42,10 @@ class INTOutput():
         }
         self.logger = logger
         self.check = ''
-        
-    
+
+
     def rec_linkid_cq(self):
-        
+
         for i in range(1,6):
             if self.args.block == "amp":
                 self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ']
@@ -55,14 +55,14 @@ class INTOutput():
             else:
                 self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ'] \
                           + self.irecord[f"Idx{i}ANXStrat_CQ"]
-                          
+
             if self.irecord[f'_int_idx{i}_RecLinkID_CQ'] in ('___', '__'):
                 self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = '_'
-            
+
         return self
 
     def rec_linkid_pq(self):
-        
+
         for i in range(1,6):
             if self.args.block == "amp":
                 self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ']
@@ -72,10 +72,10 @@ class INTOutput():
             else:
                 self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ'] \
                           + self.irecord[f"Idx{i}ANXStrat_PQ"]
-                          
+
             if self.irecord[f'_int_idx{i}_RecLinkID_PQ'] in ('___', '__'):
                 self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = '_'
-                
+
         return self
 
 
@@ -120,7 +120,9 @@ class INTOutput():
                 key = self.irecord[f'_int_idx{i}_RecLinkID_PQ']
                 if key != '_' and key in idx:
                     self.check = key
-                idx[key] = i
+                    idx[key].append(i)
+                else:
+                    idx[key] = [i]
             self.irecord['__idxordersync_pq'] = idx
 
         return self
@@ -135,9 +137,11 @@ class INTOutput():
                 key = self.irecord[f'_int_idx{i}_RecLinkID_CQ']
                 if key != '_' and key in idx:
                     self.check = key
-                idx[key] = i
+                    idx[key].append(i)
+                else:
+                    idx[key] = [i]
             self.irecord['__idxordersync_cq'] = idx
-        
+
         if self.check:
             self.logger.info('PolNo : '+self.irecord['PolNo'] + ' key : '+self.check)
 
@@ -210,6 +214,14 @@ class INTOutput():
             self.irecord[f'_int_idx{idx}_anniv'] = self.get_anniv(idx)
         return self
 
+    def get_maturity_date(self, valdate, issue_date_pq, idx):
+        if self.args.block in ['jackson.fia', 'jackson.tda']:
+            maturity_date = issue_date_pq.replace(year = valdate.year)
+        else:
+            maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{idx}TermStart_PQ']) + \
+                                   int(self.irecord[f'Idx{idx}Term_PQ']) * 12 - 1, 0)
+        return maturity_date
+
     def get_anniv(self, idx):
         '''
         calculates maturity status of strategy
@@ -228,8 +240,7 @@ class INTOutput():
         elif self.irecord['join_indicator'] in ('AB', 'B'):
             issue_date_pq = datetime.datetime.strptime(
                 self.irecord['IssueDate_PQ'], '%Y%m%d').date()
-            maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{idx}TermStart_PQ']) + \
-                                       int(self.irecord[f'Idx{idx}Term_PQ']) * 12 - 1, 0)
+            maturity_date = self.get_maturity_date(valdate, issue_date_pq, idx)
             if valdate >= maturity_date > shift_date(valdate, 0, -3, 0):
                 return 'Y'
             else:
@@ -280,8 +291,7 @@ class INTOutput():
         for i in range(1, 6):
             if self.irecord[f'_int_idx{i}_anniv'] == 'Y' and self.irecord['join_indicator'] in ('AB', 'B'):
                 issue_date_pq = datetime.datetime.strptime(self.irecord['IssueDate_PQ'], '%Y%m%d').date()
-                maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{i}TermStart_PQ']) + \
-                                           int(self.irecord[f'Idx{i}Term_PQ']) * 12 - 1, 0)
+                maturity_date = self.get_maturity_date(valdate, issue_date_pq, i)
                 self.irecord[f'_int_idx{i}_days'] = (valdate - maturity_date).days
             else:
                 self.irecord[f'_int_idx{i}_days'] = 1
@@ -333,7 +343,7 @@ def generate_ail(args, conf, logger):
     '''
     main function
     '''
-    
+
     obj = xlrd.open_workbook(conf['eor_file'].format(dir = conf['dir'],
                                                      date = args.valuation_date, block = args.block))
 
@@ -351,7 +361,7 @@ def generate_ail(args, conf, logger):
 
     avrf_files = conf['avrf_input'].split(',')
     avrf_key = conf['avrf_key'].split(',')
-    
+
     if args.block in ('amp', 'ila', 'anx', 'amp', 'tda'):
         for file in range(len(avrf_files)):
             file_path = avrf_files[file].format(dir = conf['dir'],
