@@ -40,7 +40,11 @@ class Step9:
             if f'Idx{index}AOptNomMV' in fieldnames:
                 key = merger_row[f"_int_idx{index}_RecLinkID_CQ"]
                 if key != '_' and merger_row['join_indicator'] == 'AB':
-                    idx = eval(merger_row['__idxordersync_pq']).get(key, index)
+                    idx_list = eval(merger_row["__idxordersync_pq"]).get(key, [index])
+                    if len(idx_list) > 1:
+                        idx = index
+                    else:
+                        idx = idx_list[0]
                 else:
                     idx = index
                 current_row = self.IdxAOptNomMV(merger_row, current_row, index, idx)
