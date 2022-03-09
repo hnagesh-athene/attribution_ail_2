@@ -19,8 +19,6 @@ class Step9:
         '''
         logic for the field
         '''
-        if merger_row['join_indicator'] == 'A':
-            current_row[f'Idx{index}AOptNomMV'] = merger_row[f'Idx{index}IncepCost_CQ']
 
         if merger_row['join_indicator'] == 'AB':
             if merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' and merger_row[f'_int_idx{idx}_anniv'] == 'N':
