@@ -120,9 +120,10 @@ class INTOutput():
                 key = self.irecord[f'_int_idx{i}_RecLinkID_PQ']
                 if key != '_' and key in idx:
                     self.check = key
-                    idx[key].append(i)
+                    idx = {}
+                    break
                 else:
-                    idx[key] = [i]
+                    idx[key] = i
             self.irecord['__idxordersync_pq'] = idx
 
         return self
@@ -137,9 +138,9 @@ class INTOutput():
                 key = self.irecord[f'_int_idx{i}_RecLinkID_CQ']
                 if key != '_' and key in idx:
                     self.check = key
-                    idx[key].append(i)
+                    idx = {}
                 else:
-                    idx[key] = [i]
+                    idx[key] = i
             self.irecord['__idxordersync_cq'] = idx
 
         if self.check:
@@ -377,7 +378,7 @@ def generate_ail(args, conf, logger):
     elif args.block in ('voya_fia', 'voya_fa'):
         for file in range(len(avrf_files)):
             file_path = avrf_files[file].format(dir = conf['dir'],
-                            date = args.valuation_date, block = args.block)
+                            date = args.valuation_date, block = args.block, valdate = args.valuation_date)
             file_kv = avrf_key[file].split('|')
             polno = file_kv[0].split(':')[1]
             indexcredit = file_kv[1].split(':')[1]
