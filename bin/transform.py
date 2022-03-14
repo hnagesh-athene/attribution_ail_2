@@ -244,6 +244,7 @@ class Transform:
                 for change in self.changes[8].functions:
                     current_row = self.row
                     current_row = change(merger_row, current_row, self.fieldnames)
+                self.writers[idx].send(current_row)
         return current_row
 
     def write_all(self, previous_row):

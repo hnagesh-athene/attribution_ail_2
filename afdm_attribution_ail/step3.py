@@ -33,8 +33,6 @@ class Step3:
             "GMWBRollup2",
             "GMWBRollup3",
             "GMWBRollup4",
-            "GMWBInitAccumPeriod",
-            "GMWBMaxAccumPeriod",
             "GMWBMaxCharge",
             "RiderCharge_DeductGtd",
             "F133IncRiderAV",

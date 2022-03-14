@@ -15,8 +15,6 @@ class Step5:
         self.fields = [
             "GMWBCharge",
             "GMWBMaxBenTable",
-            "GMWBInitAccumPeriod",
-            "GMWBMaxAccumPeriod",
             "GMWBMaxCharge",
             "AdditionalRestartMonths",
             "RestartCharge",

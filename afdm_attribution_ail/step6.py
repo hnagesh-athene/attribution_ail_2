@@ -25,7 +25,7 @@ class Step6:
             "GMWBRollup2",
             "GMWBRollup3",
             "GMWBRollup4",
-            "GMWBMaxAccumPeriod",
+            "GMWBMaxBenTable",
             "GMWBMaxCharge",
             "F133GMWBPayment",
             "IRRestartNew",
