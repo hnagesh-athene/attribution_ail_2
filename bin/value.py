@@ -214,10 +214,23 @@ class INTOutput():
         for idx in range(1, 6):
             self.irecord[f'_int_idx{idx}_anniv'] = self.get_anniv(idx)
         return self
+    
+    def is_leap_year(self, _year):
+        return True if (_year - 2000) % 4 == 0 else False
 
-    def get_maturity_date(self, valdate, issue_date_pq, idx):
+    def adjust_for_leap_year(self, _year, _month, _day):
+        if (self.is_leap_year(_year), _month, _day) == (False, 2, 29):
+            _day = _day - 1
+        return datetime.datetime(_year,_month, _day).date()
+
+    def get_maturity_date(self, valdate, issue_date_pq, idx, term):
         if self.args.block in ['jackson.fia', 'jackson.tda']:
             maturity_date = issue_date_pq.replace(year = valdate.year)
+        elif self.args.block in ('voya_fia', 'voya_fa'):
+            if float(self.irecord[f'Idx{idx}AVIF_PQ']) <= 0:
+                term = 1
+            mat_yr = valdate.year - (valdate.year - issue_date_pq.year) % term
+            return self.adjust_for_leap_year(mat_yr, issue_date_pq.month, issue_date_pq.day)
         else:
             maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{idx}TermStart_PQ']) + \
                                    int(self.irecord[f'Idx{idx}Term_PQ']) * 12 - 1, 0)
@@ -241,7 +254,7 @@ class INTOutput():
         elif self.irecord['join_indicator'] in ('AB', 'B'):
             issue_date_pq = datetime.datetime.strptime(
                 self.irecord['IssueDate_PQ'], '%Y%m%d').date()
-            maturity_date = self.get_maturity_date(valdate, issue_date_pq, idx)
+            maturity_date = self.get_maturity_date(valdate, issue_date_pq, idx, int(self.irecord[f'Idx{idx}Term_PQ']))
             if valdate >= maturity_date > shift_date(valdate, 0, -3, 0):
                 return 'Y'
             else:
@@ -292,7 +305,7 @@ class INTOutput():
         for i in range(1, 6):
             if self.irecord[f'_int_idx{i}_anniv'] == 'Y' and self.irecord['join_indicator'] in ('AB', 'B'):
                 issue_date_pq = datetime.datetime.strptime(self.irecord['IssueDate_PQ'], '%Y%m%d').date()
-                maturity_date = self.get_maturity_date(valdate, issue_date_pq, i)
+                maturity_date = self.get_maturity_date(valdate, issue_date_pq, i, int(self.irecord[f'Idx{i}TermStart_PQ']))
                 self.irecord[f'_int_idx{i}_days'] = (valdate - maturity_date).days
             else:
                 self.irecord[f'_int_idx{i}_days'] = 1
