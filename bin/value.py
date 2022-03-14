@@ -255,7 +255,7 @@ class INTOutput():
             issue_date_pq = datetime.datetime.strptime(
                 self.irecord['IssueDate_PQ'], '%Y%m%d').date()
             maturity_date = self.get_maturity_date(valdate, issue_date_pq, idx, int(self.irecord[f'Idx{idx}Term_PQ']))
-            if valdate >= maturity_date > shift_date(valdate, 0, -3, 0):
+            if valdate >= maturity_date >= shift_date(valdate, 0, -3, 0):
                 return 'Y'
             else:
                 return 'N'
