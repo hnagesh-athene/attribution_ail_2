@@ -224,7 +224,7 @@ class INTOutput():
         return datetime.datetime(_year,_month, _day).date()
 
     def get_maturity_date(self, valdate, issue_date_pq, idx, term):
-        if self.args.block in ('voya_fia', 'voya_fa', 'jackson.fia', 'jackson.tda'):
+        if self.args.block in ('voya_fia', 'voya_fa', 'jackson.fia', 'jackson.tda', 'Rocky.tda', 'Rocky.fda'):
             if float(self.irecord[f'Idx{idx}AVIF_PQ']) <= 0:
                 term = 1
             mat_yr = valdate.year - (valdate.year - issue_date_pq.year) % term
