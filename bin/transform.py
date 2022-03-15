@@ -133,7 +133,7 @@ class Transform:
             if merger_row['join_indicator'] in ('AB', 'B'):
                 for change in self.changes[0].functions:
                     previous_row = self.row
-                    previous_row = change(merger_row, previous_row, self.fieldnames)
+                    previous_row = change(merger_row, previous_row, self.fieldnames, self.args)
                 self.writers[idx].send(previous_row)
         return previous_row
 

@@ -16,7 +16,7 @@ class Step1:
         self.functions = [self.IdxAOptNomMV,
                           self.generate]
 
-    def IdxAOptNomMV(self, merge, previous_row, fieldnames):
+    def IdxAOptNomMV(self, merge, previous_row, fieldnames, args):
         '''
         logic for the field
         '''
@@ -31,13 +31,16 @@ class Step1:
                 if merge[f'_int_idx{i}_anniv'] == 'Y' and float(merge['index_credit']) != 0 \
                         and sum_idx_avif != 0:
                     previous_row[f'Idx{i}AOptNomMV'] = float(merge['index_credit']) / sum_idx_avif
-                elif float(merge[f'Idx{i}AVIF_PQ']) != 0:
-                    previous_row[f'Idx{i}AOptNomMV'] = merge[f'Idx{i}AOptNomMV_PQ']
                 else:
-                    previous_row[f'Idx{i}AOptNomMV'] = 0
+                    if (args.block in ('jackson.tda', 'jackson.fia')) and float(merge['index_credit']) == 0:
+                        previous_row[f'Idx{i}AOptNomMV'] = merge[f'Idx{i}AOptNomMV_PQ']
+                    elif float(merge[f'Idx{i}AVIF_PQ']) != 0:
+                        previous_row[f'Idx{i}AOptNomMV'] = merge[f'Idx{i}AOptNomMV_PQ']
+                    else:
+                        previous_row[f'Idx{i}AOptNomMV'] = 0
         return previous_row
 
-    def generate(self, merge, previous_row, fieldnames):
+    def generate(self, merge, previous_row, fieldnames, args):
         '''
         Default fields
         '''
