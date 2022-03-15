@@ -417,6 +417,7 @@ def generate_ail(args, conf, logger):
                     pass
                 temp = avrf_reader_dict.get(policy_number, 0)
                 avrf_reader_dict[policy_number] = temp + float(value)
+
     elif args.block in ['jackson.fia', 'jackson.tda']:
         valdate = datetime.datetime.strptime(args.valuation_date, '%Y%m%d').date()
         sec_month = valdate.replace(day = 1) - datetime.timedelta(days = 1)
@@ -431,8 +432,8 @@ def generate_ail(args, conf, logger):
                 with open(name, 'r') as f:
                     reader = csv.DictReader(f)
                     for row in reader:
-                        avrf_reader_dict[row[polno]] = avrf_reader_dict.get(row[polno], 0) + float(
-                        row[indexcredit] if row[indexcredit] != '' else 0)
+                        avrf_reader_dict[row[polno].lstrip('0')] = avrf_reader_dict.get(row[polno].lstrip('0'), 0) + float(row[indexcredit] if row[indexcredit] != '' else 0)
+
     elif args.block in ('lsw'):
         for file in range(len(avrf_files)):
             file_path = avrf_files[file].format(dir = conf['dir'],date = args.valuation_date, block = args.block
