@@ -70,7 +70,7 @@
 	],
 	"Rocky.fia": [
 		{
-			"dir":"/actuarial_it/attribution_ail/data",
+			"dir":"C:\\Users\\E45061\\OneDrive\\workspace\\attribution_ail_aw258\\data",
 			"merge_file": "{dir}/intermediate/{date}/{block}/ail.{block}.merged.ail2",
 			"intermediate_file": "{dir}/intermediate/{date}/{block}/ail.{block}.intermediate.ail2",
 			"avrf_input": "{dir}/input/{date}/static/LNL12_AVRF {year}.{month}.{day}_reformated.xlsx",
