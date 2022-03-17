@@ -31,7 +31,7 @@ class Step1:
                 if args.block in ('voya_fia', 'voya_fa', 'jackson.tda', 'jackson.fia') and\
                  merge[f'_int_idx{i}_anniv'] == 'Y' and float(merge['index_credit']) == 0:
                     previous_row[f'Idx{i}AOptNomMV'] = 0
-                elif args.block in ('voya_fia', 'voya_fa', 'jackson.tda', 'jackson.fia', 'Rocky.fia', 'Rocky.fia') and\
+                elif args.block in ('voya_fia', 'voya_fa', 'jackson.tda', 'jackson.fia', 'Rocky.fia', 'Rocky.tda') and\
                  merge[f'_int_idx{i}_anniv'] == 'Y' and float(merge[f'Idx{i}AVIF_PQ']) == 0:
                     previous_row[f'Idx{i}AOptNomMV'] = 0
                 elif args.block in ('voya_fia', 'voya_fa') and merge[f'_int_idx{i}_anniv'] == 'N':
