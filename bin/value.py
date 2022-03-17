@@ -225,9 +225,10 @@ class INTOutput():
 
     def _new_idx_flag(self):
         for i in range(1,6):
-            if self.irecord[f'_int_idx{i}_RecLinkID_CQ'] != self.irecord[f'_int_idx{i}_RecLinkID_PQ']:
-                return True
-        return False
+            if [self.irecord[f'_int_idx{i}_RecLinkID_CQ'] for i in range(1,6)].sort == \
+                    [self.irecord[f'_int_idx{i}_RecLinkID_PQ'] for i in range(1,6)].sort:
+                return False
+        return True
 
     def get_maturity_date(self, valdate, issue_date_cq, issue_date_pq, idx): # term form CQ
 
