@@ -28,16 +28,21 @@ class Step1:
                 if merge[f'Idx{i}AVIF_PQ'] and merge[f'_int_idx{i}_anniv'] == 'Y':
                     sum_idx_avif += float(merge[f'Idx{i}AVIF_PQ'])
             for i in range(1, 6):
-                if merge[f'_int_idx{i}_anniv'] == 'Y' and float(merge['index_credit']) != 0 \
+                if args.block in ('voya_fia', 'voya_fa', 'jackson.tda', 'jackson.fia') and\
+                 merge[f'_int_idx{i}_anniv'] == 'Y' and float(merge['index_credit']) == 0:
+                    previous_row[f'Idx{i}AOptNomMV'] = 0
+                elif args.block in ('voya_fia', 'voya_fa', 'jackson.tda', 'jackson.fia', 'Rocky.fia', 'Rocky.tda') and\
+                 merge[f'_int_idx{i}_anniv'] == 'Y' and float(merge[f'Idx{i}AVIF_PQ']) == 0:
+                    previous_row[f'Idx{i}AOptNomMV'] = 0
+                elif args.block in ('voya_fia', 'voya_fa') and merge[f'_int_idx{i}_anniv'] == 'N':
+                    previous_row[f'Idx{i}AOptNomMV'] = merge[f'Idx{i}AOptNomMV_PQ']
+                elif merge[f'_int_idx{i}_anniv'] == 'Y' and float(merge['index_credit']) != 0 \
                         and sum_idx_avif != 0:
                     previous_row[f'Idx{i}AOptNomMV'] = float(merge['index_credit']) / sum_idx_avif
+                elif float(merge[f'Idx{i}AVIF_PQ']) != 0:
+                    previous_row[f'Idx{i}AOptNomMV'] = merge[f'Idx{i}AOptNomMV_PQ']
                 else:
-                    if (args.block in ('jackson.tda', 'jackson.fia')) and float(merge['index_credit']) == 0:
-                        previous_row[f'Idx{i}AOptNomMV'] = merge[f'Idx{i}AOptNomMV_PQ']
-                    elif float(merge[f'Idx{i}AVIF_PQ']) != 0:
-                        previous_row[f'Idx{i}AOptNomMV'] = merge[f'Idx{i}AOptNomMV_PQ']
-                    else:
-                        previous_row[f'Idx{i}AOptNomMV'] = 0
+                    previous_row[f'Idx{i}AOptNomMV'] = 0
         return previous_row
 
     def generate(self, merge, previous_row, fieldnames, args):
