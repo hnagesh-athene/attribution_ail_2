@@ -25,16 +25,18 @@ class Step1:
                 return previous_row
             sum_idx_avif = 0
             for i in range(1, 6):
-                if merge[f'Idx{i}AVIF_PQ'] and merge[f'_int_idx{i}_anniv'] == 'Y':
+                if args.block in ('Rocky.fia', 'Rocky.tda') and merge[f'Idx{i}AVIF_PQ']:
+                    sum_idx_avif += float(merge[f'Idx{i}AVIF_PQ'])
+                elif merge[f'Idx{i}AVIF_PQ'] and merge[f'_int_idx{i}_anniv'] == 'Y':
                     sum_idx_avif += float(merge[f'Idx{i}AVIF_PQ'])
             for i in range(1, 6):
-                if args.block in ('voya_fia', 'voya_fa', 'jackson.tda', 'jackson.fia') and\
+                if args.block in ('voya_fia', 'voya_fa', 'jackson.tda', 'jackson.fia', 'Rocky.fia', 'Rocky.tda') and\
                  merge[f'_int_idx{i}_anniv'] == 'Y' and float(merge['index_credit']) == 0:
                     previous_row[f'Idx{i}AOptNomMV'] = 0
                 elif args.block in ('voya_fia', 'voya_fa', 'jackson.tda', 'jackson.fia', 'Rocky.fia', 'Rocky.tda') and\
                  merge[f'_int_idx{i}_anniv'] == 'Y' and float(merge[f'Idx{i}AVIF_PQ']) == 0:
                     previous_row[f'Idx{i}AOptNomMV'] = 0
-                elif args.block in ('voya_fia', 'voya_fa') and merge[f'_int_idx{i}_anniv'] == 'N':
+                elif args.block in ('voya_fia', 'voya_fa', 'Rocky.fia', 'Rocky.tda') and merge[f'_int_idx{i}_anniv'] == 'N':
                     previous_row[f'Idx{i}AOptNomMV'] = merge[f'Idx{i}AOptNomMV_PQ']
                 elif merge[f'_int_idx{i}_anniv'] == 'Y' and float(merge['index_credit']) != 0 \
                         and sum_idx_avif != 0:
