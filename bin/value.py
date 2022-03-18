@@ -245,17 +245,24 @@ class INTOutput():
                     term = 1
                 mat_yr = valdate.year - (valdate.year - issue_date_pq.year) % term
                 return self.adjust_for_leap_year(mat_yr, issue_date_pq.month, issue_date_pq.day)
-                
-        elif self._new_idx_flag() == True and self.irecord['join_indicator'] in ('A','AB'):
+
+        elif self._new_idx_flag() == True and self.irecord['join_indicator'] in ('A'):
             maturity_date = shift_date(issue_date_cq, 0, int(self.irecord[f'Idx{idx}TermStart_CQ']) - 1, 0)
 
-        elif self.irecord['join_indicator'] == 'B': # A = currrent and B = prior
-            maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{idx}TermStart_PQ']) - 1, 0)
+        elif self._new_idx_flag() == True and self.irecord['join_indicator'] == 'AB': # A = currrent and B = prior
+            maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{idx}TermStart_PQ']) + \
+                                       int(self.irecord[f'Idx{idx}Term_PQ']) * 12 - 1, 0)
+
+        elif self.irecord['join_indicator'] in ('B'): # A = currrent and B = prior
+            maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{idx}TermStart_PQ']) + \
+                                       int(self.irecord[f'Idx{idx}Term_PQ']) * 12 - 1, 0)
 
         else:
-            maturity_date = shift_date(issue_date_cq, 0, int(self.irecord[f'Idx{idx}TermStart_CQ']) + \
-                                       int(self.irecord[f'Idx{idx}Term_CQ']) * 12 - 1, 0)
+            maturity_date = shift_date(issue_date_cq, 0, int(self.irecord[f'Idx{idx}TermStart_CQ']) - 1, 0)
+
         return maturity_date
+
+
 
     def get_anniv(self, idx):
         '''
@@ -433,13 +440,15 @@ def generate_ail(args, conf, logger):
             for index in range(1, sheet.nrows):
                 policy_number = sheet.cell_value(index, 0)
                 value = sheet.cell_value(index, 15)
-                try:
-                    if '(' in value:
-                        value = value[1:-1]
-                except:
-                    pass
-                temp = avrf_reader_dict.get(policy_number, 0)
-                avrf_reader_dict[policy_number] = temp + float(value)
+                fund = sheet.cell_value(index, 4)
+                if "FIXED" not in fund:
+                    try:
+                        if '(' in value:
+                            value = value[1:-1]
+                    except:
+                        pass
+                    temp = avrf_reader_dict.get(policy_number, 0)
+                    avrf_reader_dict[policy_number] = temp + float(value)
 
     elif args.block in ['jackson.fia', 'jackson.tda']:
         valdate = datetime.datetime.strptime(args.valuation_date, '%Y%m%d').date()
