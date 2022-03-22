@@ -25,9 +25,7 @@ class Step1:
                 return previous_row
             sum_idx_avif = 0
             for i in range(1, 6):
-                if args.block in ('Rocky.fia', 'Rocky.tda') and merge[f'Idx{i}AVIF_PQ']:
-                    sum_idx_avif += float(merge[f'Idx{i}AVIF_PQ'])
-                elif merge[f'Idx{i}AVIF_PQ'] and merge[f'_int_idx{i}_anniv'] == 'Y':
+                if merge[f'Idx{i}AVIF_PQ'] and merge[f'_int_idx{i}_anniv'] == 'Y':
                     sum_idx_avif += float(merge[f'Idx{i}AVIF_PQ'])
             for i in range(1, 6):
                 if args.block in ('voya_fia', 'voya_fa', 'Rocky.fia', 'Rocky.tda') and\

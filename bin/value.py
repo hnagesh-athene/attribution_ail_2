@@ -233,7 +233,13 @@ class INTOutput():
     def get_maturity_date(self, valdate, issue_date_cq, issue_date_pq, idx): # term form CQ
 
         if self.args.block in ('voya_fia', 'voya_fa', 'jackson.fia', 'jackson.tda'):
-            if self.irecord['join_indicator'] in ('A','AB'):
+            if self._new_idx_flag() == False and self.irecord['join_indicator'] in ('AB'):
+                term = int(self.irecord[f'Idx{idx}Term_PQ'])
+                if float(self.irecord[f'Idx{idx}AVIF_PQ']) <= 0:
+                    term = 1
+                mat_yr = valdate.year - (valdate.year - issue_date_pq.year) % term
+                return self.adjust_for_leap_year(mat_yr, issue_date_pq.month, issue_date_pq.day)
+            elif self._new_idx_flag() == True and self.irecord['join_indicator'] in ('AB'):
                 term = int(self.irecord[f'Idx{idx}Term_CQ'])
                 if float(self.irecord[f'Idx{idx}AVIF_CQ']) <= 0:
                     term = 1
@@ -246,14 +252,14 @@ class INTOutput():
                 mat_yr = valdate.year - (valdate.year - issue_date_pq.year) % term
                 return self.adjust_for_leap_year(mat_yr, issue_date_pq.month, issue_date_pq.day)
 
-        elif self._new_idx_flag() == True and self.irecord['join_indicator'] in ('A'):
-            maturity_date = shift_date(issue_date_cq, 0, int(self.irecord[f'Idx{idx}TermStart_CQ']) - 1, 0)
-
-        elif self._new_idx_flag() == True and self.irecord['join_indicator'] == 'AB': # A = currrent and B = prior
+        elif self.args.block in ('fia', 'tda', 'ila', 'amp', 'anx'):
             maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{idx}TermStart_PQ']) + \
                                        int(self.irecord[f'Idx{idx}Term_PQ']) * 12 - 1, 0)
 
-        elif self.irecord['join_indicator'] in ('B'): # A = currrent and B = prior
+        elif self._new_idx_flag() == True and self.irecord['join_indicator'] in ('A', 'AB'):
+            maturity_date = shift_date(issue_date_cq, 0, int(self.irecord[f'Idx{idx}TermStart_CQ']) - 1, 0)
+
+        elif self.irecord['join_indicator'] in ('B', 'AB'): # A = currrent and B = prior
             maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{idx}TermStart_PQ']) + \
                                        int(self.irecord[f'Idx{idx}Term_PQ']) * 12 - 1, 0)
 
