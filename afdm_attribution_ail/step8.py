@@ -15,7 +15,7 @@ class Step8:
         self.functions = [self.generate,
                           self.idxAOptNomMV_formater]
 
-    def idxAOptNomMV(self, merger_row, current_row, index, idx):
+    def idxAOptNomMV(self, merger_row, current_row, index, idx, args):
         """
         logic for the field
         """
@@ -25,6 +25,8 @@ class Step8:
                 current_row[f"Idx{index}AOptNomMV"] = merger_row[f"Idx{idx}AOptNomMV_PQ"]
             if merger_row[f"_int_idx{index}_RecLinkID_CQ"] != '_' and merger_row[f"_int_idx{index}_anniv_cq"] == "Y":
                 current_row[f"Idx{index}AOptNomMV"] = merger_row[f"Idx{index}IncepCost_CQ"]
+            if args.block in ('jackson.tda', 'jackson.fia') and merger_row[f'Idx{index}CredStrategy_CQ'] == '_' :
+                current_row[f"Idx{index}AOptNomMV"] = 0
         return current_row
 
     def idxAOptNomMV_formater(self, merger_row, current_row, fieldnames, args):
@@ -38,7 +40,7 @@ class Step8:
                     idx = eval(merger_row["__idxordersync_pq"]).get(key, index)
                 else:
                     idx = index
-                current_row = self.idxAOptNomMV(merger_row, current_row, index, idx)
+                current_row = self.idxAOptNomMV(merger_row, current_row, index, idx, args)
 
         return current_row
 
