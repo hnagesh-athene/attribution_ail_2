@@ -21,10 +21,10 @@ class Step9:
         '''
 
         if merger_row['join_indicator'] == 'AB':
-            if merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' and merger_row[f'_int_idx{idx}_anniv'] == 'N':
+            if merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' and merger_row[f'_int_idx{index}_anniv_cq'] == 'N':
                 current_row[f'Idx{index}AOptNomMV'] = float(merger_row[f'Idx{idx}AOptNomMV_PQ']) \
                                                       * ((1 + float(merger_row[f'_int_idx{idx}_eor'])) ** (1 / 4))
-            if merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' and merger_row[f'_int_idx{idx}_anniv'] == 'Y':
+            if merger_row[f'_int_idx{index}_RecLinkID_CQ'] != '_' and merger_row[f'_int_idx{index}_anniv_cq'] == 'Y':
                 current_row[f'Idx{index}AOptNomMV'] = float(merger_row[f'Idx{index}IncepCost_CQ']) \
                                                       * ((1 + float(merger_row[f'_int_idx{idx}_eor'])) \
                                                          ** (float(merger_row[f'_int_idx{idx}_days']) / 365))
@@ -43,7 +43,7 @@ class Step9:
                     idx = index
                 current_row = self.IdxAOptNomMV(merger_row, current_row, index, idx)
         return current_row
-        
+
     def generate(self, merger_row, current_row, fieldnames, args):
         """
         Default fields

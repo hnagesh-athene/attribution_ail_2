@@ -51,10 +51,10 @@ class INTOutput():
                 self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ']
             elif self.args.block in ('voya_fia', 'voya_fa', 'Rocky.fia', 'Rocky.tda', 'jackson.fia', 'jackson.tda', 'lsw'):
                 self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ'] \
-                          + self.irecord[f'Idx{i}CredStrategy_CQ']
+                                                            + self.irecord[f'Idx{i}CredStrategy_CQ']
             else:
                 self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = self.irecord[f'Idx{i}Index_CQ'] + self.irecord[f'Idx{i}RecLinkID_CQ'] \
-                          + self.irecord[f"Idx{i}ANXStrat_CQ"]
+                                                            + self.irecord[f"Idx{i}ANXStrat_CQ"]
 
             if self.irecord[f'_int_idx{i}_RecLinkID_CQ'] in ('___', '__'):
                 self.irecord[f'_int_idx{i}_RecLinkID_CQ'] = '_'
@@ -68,10 +68,10 @@ class INTOutput():
                 self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ']
             elif self.args.block in ('voya_fia', 'voya_fa', 'Rocky.fia', 'Rocky.tda', 'jackson.fia', 'jackson.tda', 'lsw'):
                 self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ'] \
-                          + self.irecord[f'Idx{i}CredStrategy_PQ']
+                                                            + self.irecord[f'Idx{i}CredStrategy_PQ']
             else:
                 self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = self.irecord[f'Idx{i}Index_PQ'] + self.irecord[f'Idx{i}RecLinkID_PQ'] \
-                          + self.irecord[f"Idx{i}ANXStrat_PQ"]
+                                                            + self.irecord[f"Idx{i}ANXStrat_PQ"]
 
             if self.irecord[f'_int_idx{i}_RecLinkID_PQ'] in ('___', '__'):
                 self.irecord[f'_int_idx{i}_RecLinkID_PQ'] = '_'
@@ -212,9 +212,10 @@ class INTOutput():
         calculates maturity status of strategies
         '''
         for idx in range(1, 6):
-            self.irecord[f'_int_idx{idx}_anniv'] = self.get_anniv(idx)
+            self.irecord[f'_int_idx{idx}_anniv_pq'] = self.get_anniv(idx, 'PQ') if 'B' in self.irecord['join_indicator'] else 'N'
+            self.irecord[f'_int_idx{idx}_anniv_cq'] = self.get_anniv(idx, 'CQ') if 'A' in self.irecord['join_indicator'] else 'N'
         return self
-    
+
     def is_leap_year(self, _year):
         return True if (_year - 2000) % 4 == 0 else False
 
@@ -224,53 +225,36 @@ class INTOutput():
         return datetime.datetime(_year,_month, _day).date()
 
     def _new_idx_flag(self):
-        for i in range(1,6):
-            if [self.irecord[f'_int_idx{i}_RecLinkID_CQ'] for i in range(1,6)].sort == \
-                    [self.irecord[f'_int_idx{i}_RecLinkID_PQ'] for i in range(1,6)].sort:
-                return False
-        return True
-
-    def get_maturity_date(self, valdate, issue_date_cq, issue_date_pq, idx): # term form CQ
-
-        if self.args.block in ('voya_fia', 'voya_fa', 'jackson.fia', 'jackson.tda'):
-            if self._new_idx_flag() == False and self.irecord['join_indicator'] in ('AB'):
-                term = int(self.irecord[f'Idx{idx}Term_PQ'])
-                if float(self.irecord[f'Idx{idx}AVIF_PQ']) <= 0:
-                    term = 1
-                mat_yr = valdate.year - (valdate.year - issue_date_pq.year) % term
-                return self.adjust_for_leap_year(mat_yr, issue_date_pq.month, issue_date_pq.day)
-            elif self._new_idx_flag() == True and self.irecord['join_indicator'] in ('AB'):
-                term = int(self.irecord[f'Idx{idx}Term_CQ'])
-                if float(self.irecord[f'Idx{idx}AVIF_CQ']) <= 0:
-                    term = 1
-                mat_yr = valdate.year - (valdate.year - issue_date_cq.year) % term
-                return self.adjust_for_leap_year(mat_yr, issue_date_cq.month, issue_date_cq.day)
-            else:
-                term = int(self.irecord[f'Idx{idx}Term_PQ'])
-                if float(self.irecord[f'Idx{idx}AVIF_PQ']) <= 0:
-                    term = 1
-                mat_yr = valdate.year - (valdate.year - issue_date_pq.year) % term
-                return self.adjust_for_leap_year(mat_yr, issue_date_pq.month, issue_date_pq.day)
-
-        elif self.args.block in ('fia', 'tda', 'ila', 'amp', 'anx'):
-            maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{idx}TermStart_PQ']) + \
-                                       int(self.irecord[f'Idx{idx}Term_PQ']) * 12 - 1, 0)
-
-        elif self._new_idx_flag() == True and self.irecord['join_indicator'] in ('A', 'AB'):
-            maturity_date = shift_date(issue_date_cq, 0, int(self.irecord[f'Idx{idx}TermStart_CQ']) - 1, 0)
-
-        elif self.irecord['join_indicator'] in ('B', 'AB'): # A = currrent and B = prior
-            maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{idx}TermStart_PQ']) + \
-                                       int(self.irecord[f'Idx{idx}Term_PQ']) * 12 - 1, 0)
-
+        '''
+        Returns '0' (False) if an indexed ReckLinkID of previous quarter is switching to fixed ReckLinkID in current
+        quarter else Returns '1' (True)
+        '''
+        pq = set([self.irecord[f'_int_idx{i}_RecLinkID_PQ'] for i in range(1,6)])
+        cq = set([self.irecord[f'_int_idx{i}_RecLinkID_CQ'] for i in range(1,6)])
+        if (pq != cq and pq == (pq or cq)):
+            self.irecord['_new_idx_flag'] = '1'
         else:
-            maturity_date = shift_date(issue_date_cq, 0, int(self.irecord[f'Idx{idx}TermStart_CQ']) - 1, 0)
+            self.irecord['_new_idx_flag'] = '0'
+        return self
+
+    def _get_maturity_date(self, valdate, idx, vr):
+        issue_date = datetime.datetime.strptime(self.irecord[f'IssueDate_{vr}'], '%Y%m%d').date()
+        term = int(self.irecord[f'Idx{idx}Term_{vr}'])
+        term_start = int(self.irecord[f'Idx{idx}TermStart_{vr}'])
+        if self.args.block in ('voya_fia', 'voya_fa', 'jackson.fia', 'jackson.tda'):
+            if float(self.irecord[f'Idx{idx}AVIF_{vr}']) <= 0:
+                term = 1
+            mat_yr = valdate.year - (valdate.year - issue_date.year) % term
+            maturity_date = self.adjust_for_leap_year(mat_yr, issue_date.month, issue_date.day)
+
+        elif vr == 'PQ':
+            maturity_date = shift_date(issue_date, 0, term_start + term * 12 - 1, 0)
+        else:
+            maturity_date = shift_date(issue_date, 0, term_start - 1, 0)
 
         return maturity_date
 
-
-
-    def get_anniv(self, idx):
+    def get_anniv(self, idx, vr):
         '''
         calculates maturity status of strategy
         '''
@@ -286,14 +270,11 @@ class INTOutput():
             else:
                 return 'N'
         elif self.irecord['join_indicator'] in ('AB', 'B'):
-            issue_date_pq = datetime.datetime.strptime(
-                self.irecord['IssueDate_PQ'], '%Y%m%d').date()
-            issue_date_cq = datetime.datetime.strptime(self.irecord['IssueDate_CQ'], '%Y%m%d').date() if self.irecord['IssueDate_CQ'] else 0
-            maturity_date = self.get_maturity_date(valdate, issue_date_cq, issue_date_pq, idx)
-            if valdate >= maturity_date >= shift_date(valdate, 0, -3, 0):
-                return 'Y'
-            else:
-                return 'N'
+            maturity_date = self._get_maturity_date(valdate, idx, vr)
+        if valdate >= maturity_date >= shift_date(valdate, 0, -3, 0):
+            return 'Y'
+        else:
+            return 'N'
 
     def idxTermStart(self):
         '''
@@ -314,7 +295,7 @@ class INTOutput():
                     term = 0
                     if 31 >= issue_date_pq.day > 22:
                         term = 1
-                    if maturity_date > shift_date(valdate, 0, -3, 0):
+                    if maturity_date >= shift_date(valdate, 0, -3, 0):
                         self.irecord[f'Idx{idx}TermStart_PQ'] = 1 + term
                     else:
                         self.irecord[f'Idx{idx}TermStart_PQ'] = int(self.irecord[f'Idx{idx}Term_PQ']) * 12 + 1 + term
@@ -326,7 +307,7 @@ class INTOutput():
                         term = 1
                     index = self.irecord['__idxordersync_pq'].get(self.irecord[f'_int_idx{idx}_RecLinkID_CQ'], idx)
                     maturity_date = shift_date(issue_date_pq, 0, int(self.irecord[f'Idx{index}Term_PQ']) * 12, 0)
-                    if maturity_date > shift_date(valdate, 0, -3, 0):
+                    if maturity_date >= shift_date(valdate, 0, -3, 0):
                         self.irecord[f'Idx{idx}TermStart_CQ'] = 1 + term
                     else:
                         self.irecord[f'Idx{idx}TermStart_CQ'] = int(self.irecord[f'Idx{index}Term_PQ']) * 12 + 1 + term
@@ -338,10 +319,8 @@ class INTOutput():
         '''
         valdate = datetime.datetime.strptime(self.args.valuation_date, '%Y%m%d').date()
         for i in range(1, 6):
-            if self.irecord[f'_int_idx{i}_anniv'] == 'Y' and self.irecord['join_indicator'] in ('AB', 'B'):
-                issue_date_pq = datetime.datetime.strptime(self.irecord['IssueDate_PQ'], '%Y%m%d').date()
-                issue_date_cq = datetime.datetime.strptime(self.irecord['IssueDate_CQ'], '%Y%m%d').date() if self.irecord['IssueDate_CQ'] else 0
-                maturity_date = self.get_maturity_date(valdate, issue_date_cq, issue_date_pq, i)
+            if self.irecord[f'_int_idx{i}_anniv_pq'] == 'Y' and self.irecord['join_indicator'] in ('AB', 'B'):
+                maturity_date = self._get_maturity_date(valdate, i, 'PQ')
                 self.irecord[f'_int_idx{i}_days'] = (valdate - maturity_date).days
             else:
                 self.irecord[f'_int_idx{i}_days'] = 1
@@ -361,7 +340,7 @@ def execute_attribute(row, avrf_reader_dict, EOR_Assumptions_reader_dict,
     afdm.policy_number() \
         .company() \
         .rec_linkid_cq() \
-        .rec_linkid_pq()\
+        .rec_linkid_pq() \
         .joint_indicator() \
         .idxordersync_pq() \
         .idxordersync_cq() \
@@ -369,7 +348,8 @@ def execute_attribute(row, avrf_reader_dict, EOR_Assumptions_reader_dict,
         .idx_eor() \
         .anniv() \
         .days_ann() \
-        .index_credit()
+        .index_credit() \
+        ._new_idx_flag()
 
     return afdm.irecord
 
@@ -380,7 +360,7 @@ def ail_row_processor(avrf_reader_dict, EOR_Assumptions_reader_dict,
     process each row
     '''
     with open(conf['merge_file'].format(dir = conf['dir'],
-                            date = args.valuation_date, block = args.block), 'r') as file:
+                                        date = args.valuation_date, block = args.block), 'r') as file:
         reader1 = csv.DictReader(file, delimiter='\t')
         for row in reader1:
             res = execute_attribute(row, avrf_reader_dict,
@@ -412,10 +392,10 @@ def generate_ail(args, conf, logger):
     avrf_files = conf['avrf_input'].split(',')
     avrf_key = conf['avrf_key'].split(',')
 
-    if args.block in ('amp', 'ila', 'anx', 'amp', 'tda'):
+    if args.block in ('amp', 'ila', 'anx', 'fia', 'tda'):
         for file in range(len(avrf_files)):
             file_path = avrf_files[file].format(dir = conf['dir'],
-                            date = args.valuation_date, block = args.block)
+                                                date = args.valuation_date, block = args.block)
             file_kv = avrf_key[file].split('|')
             polno = file_kv[0].split(':')[1]
             indexcredit = file_kv[1].split(':')[1]
@@ -427,7 +407,7 @@ def generate_ail(args, conf, logger):
     elif args.block in ('voya_fia', 'voya_fa'):
         for file in range(len(avrf_files)):
             file_path = avrf_files[file].format(dir = conf['dir'],
-                            date = args.valuation_date, block = args.block, valdate = args.valuation_date)
+                                                date = args.valuation_date, block = args.block, valdate = args.valuation_date)
             file_kv = avrf_key[file].split('|')
             polno = file_kv[0].split(':')[1]
             indexcredit = file_kv[1].split(':')[1]
@@ -505,7 +485,7 @@ def generate_ail(args, conf, logger):
         ail_row_processor(avrf_reader_dict, EOR_Assumptions_reader_dict,
                           field_names, args, conf, logger))
     with open(conf['intermediate_file'].format(dir = conf['dir'],
-                            date = args.valuation_date, block = args.block), 'w', newline='') as file:
+                                               date = args.valuation_date, block = args.block), 'w', newline='') as file:
         writer = csv.DictWriter(file,
                                 fieldnames=header + field_list,
                                 delimiter='\t',
