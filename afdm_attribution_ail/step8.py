@@ -21,9 +21,9 @@ class Step8:
         """
 
         if merger_row["join_indicator"] == "AB":
-            if merger_row[f"_int_idx{index}_RecLinkID_CQ"] != '_' and merger_row[f"_int_idx{idx}_anniv"] == "N":
+            if merger_row[f"_int_idx{index}_RecLinkID_CQ"] != '_' and merger_row[f"_int_idx{index}_anniv_cq"] == "N":
                 current_row[f"Idx{index}AOptNomMV"] = merger_row[f"Idx{idx}AOptNomMV_PQ"]
-            if merger_row[f"_int_idx{index}_RecLinkID_CQ"] != '_' and merger_row[f"_int_idx{idx}_anniv"] == "Y":
+            if merger_row[f"_int_idx{index}_RecLinkID_CQ"] != '_' and merger_row[f"_int_idx{index}_anniv_cq"] == "Y":
                 current_row[f"Idx{index}AOptNomMV"] = merger_row[f"Idx{index}IncepCost_CQ"]
         return current_row
 
@@ -41,7 +41,7 @@ class Step8:
                 current_row = self.idxAOptNomMV(merger_row, current_row, index, idx)
 
         return current_row
-    
+
     def generate(self, merger_row, current_row, fieldnames, args):
         """
         Default fields
