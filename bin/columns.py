@@ -377,5 +377,11 @@ Columns_ail = [
     "_int_idx3_RecLinkID_PQ",
     "_int_idx4_RecLinkID_PQ",
     "_int_idx5_RecLinkID_PQ",
-    "_new_idx_flag"
+    "_new_idx_flag",
+    "_int_idx1_new_idx_CQ",
+    "_int_idx2_new_idx_CQ",
+    "_int_idx3_new_idx_CQ",
+    "_int_idx4_new_idx_CQ",
+    "_int_idx5_new_idx_CQ"
+
 ]

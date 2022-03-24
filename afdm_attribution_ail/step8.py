@@ -21,12 +21,15 @@ class Step8:
         """
 
         if merger_row["join_indicator"] == "AB":
-            if merger_row[f"_int_idx{index}_RecLinkID_CQ"] != '_' and merger_row[f"_int_idx{index}_anniv_cq"] == "N":
+            if merger_row[f"_int_idx{index}_RecLinkID_CQ"] != '_' and merger_row[f"_int_idx{index}_anniv_cq"] == "N" and merger_row[f'_int_idx{index}_new_idx_CQ'] == 'N':
                 current_row[f"Idx{index}AOptNomMV"] = merger_row[f"Idx{idx}AOptNomMV_PQ"]
             if merger_row[f"_int_idx{index}_RecLinkID_CQ"] != '_' and merger_row[f"_int_idx{index}_anniv_cq"] == "Y":
                 current_row[f"Idx{index}AOptNomMV"] = merger_row[f"Idx{index}IncepCost_CQ"]
             if args.block in ('jackson.tda', 'jackson.fia') and merger_row[f'Idx{index}CredStrategy_CQ'] == '_' :
                 current_row[f"Idx{index}AOptNomMV"] = 0
+        if merger_row["join_indicator"] == "A":
+            if merger_row[f"_int_idx{index}_RecLinkID_CQ"] != '_' and merger_row[f"_int_idx{index}_anniv_cq"] == "Y" and merger_row[f'_int_idx{index}_new_idx_CQ'] == 'Y':
+                current_row[f"Idx{index}AOptNomMV"] = merger_row[f"Idx{index}IncepCost_CQ"]
         return current_row
 
     def idxAOptNomMV_formater(self, merger_row, current_row, fieldnames, args):
