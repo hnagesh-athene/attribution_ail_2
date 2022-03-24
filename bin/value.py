@@ -212,8 +212,8 @@ class INTOutput():
         calculates maturity status of strategies
         '''
         for idx in range(1, 6):
-            self.irecord[f'_int_idx{idx}_anniv_pq'] = self.get_anniv(idx, 'PQ') if 'B' in self.irecord['join_indicator'] else 'N'
-            self.irecord[f'_int_idx{idx}_anniv_cq'] = self.get_anniv(idx, 'CQ') if 'A' in self.irecord['join_indicator'] else 'N'
+            self.irecord[f'_int_idx{idx}_anniv_pq'] = self.get_anniv(idx, 'PQ') if 'B' in self.irecord['join_indicator'] and self.irecord[f'_int_idx{idx}_RecLinkID_PQ'] != '_' else 'N'
+            self.irecord[f'_int_idx{idx}_anniv_cq'] = self.get_anniv(idx, 'CQ') if 'A' in self.irecord['join_indicator'] and self.irecord[f'_int_idx{idx}_RecLinkID_CQ'] != '_' else 'N'
         return self
 
     def is_leap_year(self, _year):
@@ -237,13 +237,19 @@ class INTOutput():
             self.irecord['_new_idx_flag'] = '0'
         return self
 
+    def _new_idx_bucket_ind(self):
+        pq = set([self.irecord[f'_int_idx{i}_RecLinkID_PQ'] for i in range(1, 6)])
+        for x in range(1,6):
+            self.irecord[f'_int_idx{x}_new_idx_CQ'] = 'N' if self.irecord[f'_int_idx{x}_RecLinkID_CQ'] in pq else 'Y'
+        return self
+
     def _get_maturity_date(self, valdate, idx, vr):
         issue_date = datetime.datetime.strptime(self.irecord[f'IssueDate_{vr}'], '%Y%m%d').date()
         term = int(self.irecord[f'Idx{idx}Term_{vr}'])
         term_start = int(self.irecord[f'Idx{idx}TermStart_{vr}'])
         if self.args.block in ('voya_fia', 'voya_fa', 'jackson.fia', 'jackson.tda'):
             if float(self.irecord[f'Idx{idx}AVIF_{vr}']) <= 0:
-                term = 1
+                term = 1 if term in (None, '', 0) else term
             mat_yr = valdate.year - (valdate.year - issue_date.year) % term
             maturity_date = self.adjust_for_leap_year(mat_yr, issue_date.month, issue_date.day)
 
@@ -258,10 +264,11 @@ class INTOutput():
         '''
         calculates maturity status of strategy
         '''
+
         valdate = datetime.datetime.strptime(self.args.valuation_date, '%Y%m%d').date()
-        if self.irecord['join_indicator'] == 'A':
-            return 'N'
-        elif self.irecord['Company'] == 'CU':
+        # if self.irecord['join_indicator'] == 'A':
+        #     return 'N'
+        if self.irecord['Company'] == 'CU':
             issue_date_pq = datetime.datetime.strptime(
                 self.irecord['IssueDate_PQ'], '%Y%m%d').date()
             if issue_date_pq.month == valdate.month or issue_date_pq.month == valdate.month - 1 \
@@ -269,7 +276,7 @@ class INTOutput():
                 return 'Y'
             else:
                 return 'N'
-        elif self.irecord['join_indicator'] in ('AB', 'B'):
+        elif self.irecord['join_indicator'] in ('AB', 'B', 'A'):
             maturity_date = self._get_maturity_date(valdate, idx, vr)
         if valdate >= maturity_date >= shift_date(valdate, 0, -3, 0):
             return 'Y'
@@ -349,7 +356,8 @@ def execute_attribute(row, avrf_reader_dict, EOR_Assumptions_reader_dict,
         .anniv() \
         .days_ann() \
         .index_credit() \
-        ._new_idx_flag()
+        ._new_idx_flag() \
+        ._new_idx_bucket_ind()
 
     return afdm.irecord
 
