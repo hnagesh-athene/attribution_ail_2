@@ -197,6 +197,8 @@ class INTOutput():
                     self.irecord['index_credit'] = self.avrf[PolNo]
             else:
                 self.irecord['index_credit'] = 0
+        elif self.args.block == 'amp':
+            self.irecord['index_credit'] = self.avrf[self.irecord['PolNo']]
         else:
             if self.irecord['PolNo'] in self.avrf:
                 if self.avrf[self.irecord['PolNo']] == '' or self.avrf[self.irecord['PolNo']] <= 0:
